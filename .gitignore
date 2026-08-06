@@ -1,0 +1,25 @@
+# Directory di compilazione
+build/
+cmake-build-*/
+
+# File compilati
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+
+# Output e log
+output/
+*.log
+
+# File degli editor
+.vscode/
+.idea/
+
+# File di sistema
+.DS_Store
+
+# Dati sensibili locali
+.env
