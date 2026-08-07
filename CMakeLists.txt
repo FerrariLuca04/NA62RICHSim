@@ -17,6 +17,13 @@ find_package(
 add_executable(
     na62_rich_sim
     app/main.cc
+    src/DetectorConstruction.cc
+)
+
+target_include_directories(
+    na62_rich_sim
+    PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
 )
 
 target_compile_features(
