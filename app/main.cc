@@ -1,20 +1,84 @@
 #include "na62rich/DetectorConstruction.hh"
+#include "na62rich/ActionInitialization.hh"
 
 #include "G4RunManagerFactory.hh"
+#include "G4UImanager.hh"
+#include "G4UIExecutive.hh"
+#include "G4VisExecutive.hh"
+
 #include "FTFP_BERT.hh"
 
-int main()
+int main(int argc, char** argv)
 {
+    // ---------------------------------------------------------
+    // User interface
+    // ---------------------------------------------------------
+
+    G4UIExecutive* ui = nullptr;
+
+    if (argc == 1) {
+        ui = new G4UIExecutive(argc, argv);
+    }
+
+
+    // ---------------------------------------------------------
+    // Run manager
+    // ---------------------------------------------------------
+
     G4cout << "NA62RICHSim started successfully." << G4endl;
 
-    auto* runManager =
-        G4RunManagerFactory::CreateRunManager();
+    auto* runManager = G4RunManagerFactory::CreateRunManager();
     
-    runManager->SetUserInitialization(new DetectorConstruction);
-    runManager->SetUserInitialization(new FTFP_BERT);
+    runManager->SetUserInitialization(new DetectorConstruction);  // Geometry and materials
+    runManager->SetUserInitialization(new FTFP_BERT);             // Physics list
+    runManager->SetUserInitialization(new ActionInitialization);  // Primary generation
 
-    runManager->Initialize();
 
+    // ---------------------------------------------------------
+    // Visualization
+    // ---------------------------------------------------------
+
+    auto* visManager = new G4VisExecutive();
+    visManager->Initialize();
+
+
+    // ---------------------------------------------------------
+    // UI manager
+    // ---------------------------------------------------------
+
+    auto* uiManager = G4UImanager::GetUIpointer();
+
+
+    // ---------------------------------------------------------
+    // Interactive or batch mode
+    // ---------------------------------------------------------
+
+    if (ui != nullptr) {
+
+        uiManager->ApplyCommand(
+            "/control/execute macros/init_vis.mac"
+        );
+
+        ui->SessionStart();
+
+        delete ui;
+
+    } else {
+
+        G4String command = "/control/execute ";
+        G4String macroFile = argv[1];
+
+        uiManager->ApplyCommand(
+            command + macroFile
+        );
+    }
+
+
+    // ---------------------------------------------------------
+    // Cleanup
+    // ---------------------------------------------------------
+    
+    delete visManager;
     delete runManager;
 
     return 0;

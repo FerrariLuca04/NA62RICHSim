@@ -97,6 +97,75 @@ particleGun_->GeneratePrimaryVertex(event);
 
 ### Codice
 
-Header: `PrimaryGeneratorAction.hh`
+Header: `include/na62rich/PrimaryGeneratorAction.hh`
 
-Implementazione: `PrimaryGeneratorAction.cc`
+Implementazione: `src/PrimaryGeneratorAction.cc`
+
+## 08-07 -- First Action Initialization
+
+### Obiettivo
+
+Implementare un primo esempio di `ActionInitialization.hh` e `ActionInitialization.cc`.
+
+### Scelta progettuale
+
+Si definisce una classe `ActionInitialization` derivata da `G4VUserActionInitialization` dove dobbiamo definire anche il metodo `Build()`.
+```c++
+void ActionInitialization::Build() const
+{
+    SetUserAction(new PrimaryGeneratorAction());
+}
+```
+### Codice
+
+Header: `include/na62rich/ActionInitialization.hh`
+
+Implementazione: `src/ActionInitialization.cc`
+
+## 08-07 First macro for visualization
+
+### Obiettivo
+
+Implementare una prima macro di inizializzazione `init_vis.mac` e `vis.mac` per aprire la UI di Geat4 con una visualizzazione grafica dei volumi simulati da cui poter lanciare delle simulazioni brevi con i comandi di Geat4.
+
+### Scelta progettuale
+
+Si modifica il `main.cc` per inizializzare un `visManager`.
+
+Si va a definire
+```c++
+G4UIExecutive* ui = nullptr;
+
+if (argc == 1) {
+    ui = new G4UIExecutive(argc, argv);
+}
+```
+e anche
+```c++
+auto* uiManager = G4UImanager::GetUIpointer();
+
+if (ui != nullptr) {
+
+    uiManager->ApplyCommand(
+        "/control/execute macros/init_vis.mac"
+    );
+
+    ui->SessionStart();
+
+    delete ui;
+
+} else {
+
+    G4String command = "/control/execute ";
+    G4String macroFile = argv[1];
+
+    uiManager->ApplyCommand(
+        command + macroFile
+    );
+}
+```
+in questo modo se si esegue solo il file eseguibile senza specificare la macro di Geat4 si apre la UI con una console a parte e la visualizzazione grafica, altrimenti viene eseguita la macro specificata.
+
+### Codice
+
+Implementazione: `app/main.cc` `macros/init_vis.mac` `macros/vis.mac`

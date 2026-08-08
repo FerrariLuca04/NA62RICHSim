@@ -1,0 +1,42 @@
+# ============================================================
+# NA62 RICH Simulation
+# Visualization settings
+# ============================================================
+
+
+# Open visualization system
+/vis/open OGL
+
+
+# Draw detector geometry
+/vis/drawVolume
+
+
+# Draw coordinate axes
+/vis/scene/add/axes 0 0 -15 2 m
+
+
+# Surface rendering
+/vis/viewer/set/style wireframe
+
+/vis/geometry/set/colour World    0 0.7 0.7 0.7 0.1
+/vis/geometry/set/colour Gas  0 0.0 1.0 0.0 1.0
+
+# Initial camera direction
+/vis/viewer/set/viewpointThetaPhi 60 30
+
+
+# Draw particle trajectories
+/vis/scene/add/trajectories smooth
+
+
+# Keep trajectories from multiple events
+/vis/scene/endOfEventAction accumulate
+
+
+# Automatic refresh
+/vis/viewer/set/autoRefresh true
+
+
+# Reduce visualization output
+/vis/verbose warnings

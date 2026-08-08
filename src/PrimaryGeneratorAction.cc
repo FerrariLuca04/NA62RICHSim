@@ -15,7 +15,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
     auto* pion = particleTable->FindParticle("pi+");
 
     particleGun_->SetParticleDefinition(pion);
-    particleGun_->SetParticleMomentum(20.0 * MeV);
+    particleGun_->SetParticleMomentum(20.0 * GeV);
     particleGun_->SetParticleMomentumDirection(
         G4ThreeVector(0.0, 0.0, 1.0)
     );
@@ -25,13 +25,13 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
 }
 
 
-PrimaryGeneratorActio::~PrimaryGeneratorAction()
+PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
     delete particleGun_;
 }
 
 
-void PrymaryGeneratorAction::GeneratePrimaries(G4Event* event)
+void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 {
     particleGun_->GeneratePrimaryVertex(event);
 }

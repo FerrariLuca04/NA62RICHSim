@@ -18,6 +18,8 @@ add_executable(
     na62_rich_sim
     app/main.cc
     src/DetectorConstruction.cc
+    src/PrimaryGeneratorAction.cc
+    src/ActionInitialization.cc
 )
 
 target_include_directories(
