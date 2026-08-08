@@ -122,7 +122,7 @@ Header: `include/na62rich/ActionInitialization.hh`
 
 Implementazione: `src/ActionInitialization.cc`
 
-## 08-07 First macro for visualization
+## 08-07 -- First macro for visualization
 
 ### Obiettivo
 
@@ -169,3 +169,104 @@ in questo modo se si esegue solo il file eseguibile senza specificare la macro d
 ### Codice
 
 Implementazione: `app/main.cc` `macros/init_vis.mac` `macros/vis.mac`
+
+## 08-08 -- Gas volume construction
+
+### Obiettivo
+
+Costruire il volume, con dimensioni provvisorie, del gas neon per fare una prima prova della luce Cherenkov.
+
+### Scelta progettuale
+
+Costruisco il volume come il World ma aggiungo le proprietá ottiche per permettere l'effetto Cherenkov.
+```c++
+// Optical properties
+auto* gasProperties =
+    new G4MaterialPropertiesTable();
+
+// Photon energy range
+std::vector<G4double> photonEnergy = {
+    1.9 * eV,
+    6.2 * eV
+};
+
+// Refractive index
+std::vector<G4double> refractiveIndex = {
+    1.000067,
+    1.000067
+};
+
+gasProperties->AddProperty(
+    "RINDEX",
+    photonEnergy,
+    refractiveIndex
+);
+
+gasMaterial->SetMaterialPropertiesTable(gasProperties);
+```
+Per aggiungere `"RINDEX"` si deve definire una sorta di tabella con energie (`photonEnergy`) e il valore dell'indice di rifrazione (`refractiveIndex`), poi Geat4 interpola tra i punti della tabella.
+
+### Nota
+
+Provvisoriamente ho inserito un indice costante con l'energia per i fotoni nell'UV e nel visibile.
+
+### Codice
+
+Implementazione: `src/DetectorConstruction.cc`
+
+## 08-08 -- Mirror implementation
+
+### Obiettivo
+
+Costruire uno specchio sferico provvisorio per poter iniziare ad osservare degli anelli Cherenkov
+
+### Scelta progettuale
+
+Come materiale si è utilizzato `G4_GLASS_PLATE` e si sono settate le proprietá riflettenti con il seguente blocco
+```c++
+auto* mirrorSurface =
+    new G4OpticalSurface("MirrorSurface");
+
+mirrorSurface->SetType(dielectric_metal);
+mirrorSurface->SetModel(unified);
+mirrorSurface->SetFinish(polished);
+
+std::vector<G4double> photonEnergy_Mirror = {
+    1.5 * eV,
+    7.0 * eV
+};
+
+std::vector<G4double> reflectivity = {
+    1.0,
+    1.0
+};
+
+auto* mirrorMPT =
+    new G4MaterialPropertiesTable();
+
+mirrorMPT->AddProperty(
+    "REFLECTIVITY",
+    photonEnergy_Mirror,
+    reflectivity
+);
+
+mirrorSurface->SetMaterialPropertiesTable(mirrorMPT);
+```
+ovvero definisce una superficie ottica, definisce la tabella della riflettivitá e associa questa tabella alla superficie ottica. Inoltre si definisce l'interfaccia come dal Neon allo specchio con
+```c++
+new G4LogicalBorderSurface(
+    "NeonToMirrorSurface",
+    gasPhysical,
+    mirrorPhysical,
+    mirrorSurface
+);
+```
+che rende riflettente solo línterfaccia tra i due volumi.
+
+### Note
+
+Per ora la riflettivitá è 1 per tutte le energie, in seguito si potrá aggiungere dei valori realistici.
+
+### Codice
+
+Implementazione: `src/DetectorConstruction.cc`

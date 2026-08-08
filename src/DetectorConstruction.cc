@@ -2,9 +2,15 @@
 
 #include "G4Tubs.hh"
 #include "G4Box.hh"
+#include "G4Sphere.hh"
+
 #include "G4LogicalVolume.hh"
 #include "G4NistManager.hh"
 #include "G4PVPlacement.hh"
+#include "G4OpticalSurface.hh"
+#include "G4LogicalBorderSurface.hh"
+#include "G4MaterialPropertiesTable.hh"
+
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
 
@@ -58,12 +64,36 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     
     
     // ---------------------------------------------------
-    // WORLD
+    // GAS
     // ---------------------------------------------------
 
     // Material
     auto* gasMaterial =
         nist->FindOrBuildMaterial("G4_Ne");
+
+    // Optical properties
+    auto* gasProperties =
+        new G4MaterialPropertiesTable();
+
+    // Photon energy range
+    std::vector<G4double> photonEnergy = {
+        1.9 * eV,
+        6.2 * eV
+    };
+
+    // Refractive index
+    std::vector<G4double> refractiveIndex = {
+        1.000067,
+        1.000067
+    };
+
+    gasProperties->AddProperty(
+        "RINDEX",
+        photonEnergy,
+        refractiveIndex
+    );
+
+    gasMaterial->SetMaterialPropertiesTable(gasProperties);
 
     // Gas dimensions
     constexpr G4double gasRadius = 1.5 * m;
@@ -100,6 +130,95 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
             0,
             true
         );
+
+
+    // ---------------------------------------------------
+    // MIRROR
+    // ---------------------------------------------------
+
+    constexpr G4double mirrorCurvatureRadius = 2.0 * gasLength;
+    constexpr G4double mirrorThickness       = 2.5 * cm;
+    constexpr G4double mirrorApertureRadius  = gasRadius;
+
+    // Angular size of the spherical cap
+    const G4double mirrorThetaMax = std::asin(mirrorApertureRadius / mirrorCurvatureRadius);
+
+    // Material
+    auto* mirrorMaterial =
+        nist->FindOrBuildMaterial("G4_GLASS_PLATE");
+
+    // Optical properties
+    auto* mirrorSurface =
+        new G4OpticalSurface("MirrorSurface");
+
+    mirrorSurface->SetType(dielectric_metal);
+    mirrorSurface->SetModel(unified);
+    mirrorSurface->SetFinish(polished);
+
+    std::vector<G4double> photonEnergy_Mirror = {
+        1.5 * eV,
+        7.0 * eV
+    };
+
+    std::vector<G4double> reflectivity = {
+        1.0,
+        1.0
+    };
+
+    auto* mirrorMPT =
+        new G4MaterialPropertiesTable();
+
+    mirrorMPT->AddProperty(
+        "REFLECTIVITY",
+        photonEnergy_Mirror,
+        reflectivity
+    );
+
+    mirrorSurface->SetMaterialPropertiesTable(mirrorMPT);
+    
+    // Solid
+    auto* mirrorSolid =
+        new G4Sphere(
+            "Mirror",
+            mirrorCurvatureRadius - mirrorThickness,
+            mirrorCurvatureRadius,
+            0.0,
+            twopi,
+            0.0,
+            mirrorThetaMax
+        );
+
+    // Logical volume
+    auto* mirrorLogical =
+        new G4LogicalVolume(
+            mirrorSolid,
+            mirrorMaterial,
+            "Mirror"
+        );
+
+    // Physical volume
+
+    const G4double mirrorVertexZ = gasLength / 2.0 - 1.0 * cm;
+    const G4double mirrorCenterZ = mirrorVertexZ - mirrorCurvatureRadius;
+
+    auto* mirrorPhysical =
+        new G4PVPlacement(
+            nullptr,
+            G4ThreeVector(0.0, 0.0, mirrorCenterZ),
+            mirrorLogical,
+            "Mirror",
+            gasLogical,
+            false,
+            0,
+            true
+        );
+
+    new G4LogicalBorderSurface(
+        "NeonToMirrorSurface",
+        gasPhysical,
+        mirrorPhysical,
+        mirrorSurface
+    );
 
 
     return worldPhysical;

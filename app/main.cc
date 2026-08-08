@@ -7,9 +7,18 @@
 #include "G4VisExecutive.hh"
 
 #include "FTFP_BERT.hh"
+#include "G4OpticalPhysics.hh"
 
 int main(int argc, char** argv)
-{
+{   
+    // ---------------------------------------------------------
+    // Physics list
+    // ---------------------------------------------------------
+
+    auto* physicsList = new FTFP_BERT();
+    physicsList->RegisterPhysics(new G4OpticalPhysics());
+
+
     // ---------------------------------------------------------
     // User interface
     // ---------------------------------------------------------
@@ -30,7 +39,7 @@ int main(int argc, char** argv)
     auto* runManager = G4RunManagerFactory::CreateRunManager();
     
     runManager->SetUserInitialization(new DetectorConstruction);  // Geometry and materials
-    runManager->SetUserInitialization(new FTFP_BERT);             // Physics list
+    runManager->SetUserInitialization(physicsList);             // Physics list
     runManager->SetUserInitialization(new ActionInitialization);  // Primary generation
 
 
