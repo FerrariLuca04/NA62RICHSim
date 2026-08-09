@@ -47,13 +47,13 @@ void DetectorConstruction::DefineMaterials()
     auto* nist = G4NistManager::Instance();
 
     // World
-    auto* fWorldMaterial =
+    fWorldMaterial =
         nist->FindOrBuildMaterial("G4_Galactic");
     // Gas
-    auto* fGasMaterial =
+    fGasMaterial =
         nist->FindOrBuildMaterial("G4_Ne");
     //Mirror
-    auto* fMirrorMaterial =
+    fMirrorMaterial =
         nist->FindOrBuildMaterial("G4_GLASS_PLATE");
 }
 
@@ -134,7 +134,7 @@ G4LogicalVolume* DetectorConstruction::BuildGas(G4LogicalVolume* mother)
         );
 
     // Physical Volume
-    auto* gasPhysical =
+    fGasPhysical =
         new G4PVPlacement(
             nullptr,
             G4ThreeVector(),
