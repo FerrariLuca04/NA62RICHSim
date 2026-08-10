@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
     NA62RICHSim
-    VERSION 0.2.1
+    VERSION 0.3.0
     DESCRIPTION "Educational Geant4 simulation of the NA62 RICH detector"
     LANGUAGES CXX
 )
@@ -18,6 +18,7 @@ add_executable(
     na62_rich_sim
     app/main.cc
     src/DetectorConstruction.cc
+    src/PhotonSensitiveDetector.cc
     src/PrimaryGeneratorAction.cc
     src/ActionInitialization.cc
 )

@@ -1,5 +1,7 @@
 #include "na62rich/DetectorConstruction.hh"
 
+#include "na62rich/PhotonSensitiveDetector.hh"
+
 #include "G4Tubs.hh"
 #include "G4Box.hh"
 #include "G4Sphere.hh"
@@ -13,6 +15,8 @@
 
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
+
+#include "G4SDManager.hh"
 
 // World dimensions
 constexpr G4double worldHeigth = 10.0 * m;
@@ -44,6 +48,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
     return fWorldPhysical;
 }
+void DetectorConstruction::ConstructSDandField()
+{
+    auto* sdManager = G4SDManager::GetSDMpointer();
+
+    auto* photonSD = new PhotonSensitiveDetector("PMTs");
+
+    sdManager->AddNewDetector(photonSD);
+
+    SetSensitiveDetector(
+        fPhotonSDLogical,
+        photonSD
+    );
+}
 
 
 
@@ -67,8 +84,8 @@ void DetectorConstruction::DefineMaterials()
 void DetectorConstruction::AddOpticalProperties()
 {
     std::vector<G4double> photonEnergy = {
-        0.5 * eV,
-        100.0 * eV
+        1.5 * eV,
+        10.0 * eV
     };
 
     // Gas Neon
@@ -264,7 +281,7 @@ void DetectorConstruction::BuildPhotonSD(G4LogicalVolume* mother)
         );
     
     // Logical
-    auto* photonSDLogical =
+    fPhotonSDLogical =
         new G4LogicalVolume(
             photonSDSolid,
             fPhotonSDMaterial,
@@ -278,7 +295,7 @@ void DetectorConstruction::BuildPhotonSD(G4LogicalVolume* mother)
         new G4PVPlacement(
             nullptr,
             G4ThreeVector(0.0, 0.0, photonSDVertexZ),
-            photonSDLogical,
+            fPhotonSDLogical,
             "PMTs",
             mother,
             false,

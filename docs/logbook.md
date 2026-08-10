@@ -292,3 +292,52 @@ L'idea é anche di rendere piú facile il riscalamento per aggiungere e/o modifi
 Header: `DetectorConstruction.hh`
 
 Implementazione: `DetectorConstruction.cc`
+
+## 10-08 -- Photon Sensitive Detector
+
+### Obiettivo
+
+Implementare un volume sensibile per la ricezione di fotoni ottici.
+
+### Scelta progettuale
+
+Il volume é stato implementato come tutti gli altri. Si é scelto come materiale `"G4_SILICON_DIOXIDE"` con provvisoriamente un indice di rifrazione pari a 1 (per far propagare i fotoni anche all'interno del volume sensibile).
+
+Si definisce anche la classe `PhotonSensitiveDetector` derivata da `G4VSensitiveDetector`. Ha un metodo `ProcessHits` che programma cosa fare quando avviene attavrsata da una traccia (una particella), questo metodo deve avere `return true` per registrare la hit, oppure `return false` viceversa.
+
+Si selezionano solo i fotoni ottici con
+```c++
+if (track->GetDefinition() != G4OpticalPhoton::OpticalPhotonDefinition())
+{
+    return false;
+} 
+```
+
+Si selezionano solo il primo step della traccia che entra nel volume sensibile con
+```c++
+if (step->GetPreStepPoint()->GetStepStatus() != fGeomBoundary)
+{
+    return false;
+}
+```
+E infine si killano i fotoni che sono entrati nel volume
+```c++
+track->SetTrackStatus(fStopAndKill);
+```
+
+Per associare il detector al volume geometrico si deve definire un altro metodo pubblico a `DetectorConstruction` nominata `ConstructSDandField()`, e deve contenere
+```c++
+SetSensitiveDetector(
+    fPhotonSDLogical, //Volume logico del detector
+    photonSD          //Volume sensibile associato
+);
+```
+### Note
+
+**WARNING**: In questo modo prima di chiamare `ConstructSDandField()` si deve rempire il puntatore `fPhotonSDLogical`, che viene riempito da `Construct()`. Geat4 esegue automaticamente prima il `Construct()` poi il resto.
+
+### Codice
+
+Header: `DetectorConstruction.hh` `PhotonSensitiveDetector.hh`
+
+Implementazione: `DetectorConstruction.cc` `PhotonSensitiveDetector.cc`
