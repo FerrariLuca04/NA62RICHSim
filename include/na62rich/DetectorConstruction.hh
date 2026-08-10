@@ -4,6 +4,7 @@
 #include "G4VUserDetectorConstruction.hh"
 
 class G4Material;
+class G4Surface;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 
@@ -19,10 +20,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 
         // Materials
         void DefineMaterials();
+        void AddOpticalProperties();
 
         G4Material* fWorldMaterial = nullptr;
         G4Material* fGasMaterial = nullptr;
         G4Material* fMirrorMaterial = nullptr;
+        G4Surface* fMirrorSurface = nullptr;
+        G4Material* fPhotonSDMaterial = nullptr;
 
         // Shared volumes
         G4VPhysicalVolume* fGasPhysical;
@@ -32,6 +36,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
         G4LogicalVolume* BuildGas(G4LogicalVolume* mother);
 
         void BuildMirror(G4LogicalVolume* mother);
+        void BuildPhotonSD(G4LogicalVolume* mother);
 };
 
 #endif

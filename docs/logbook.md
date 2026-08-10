@@ -270,3 +270,25 @@ Per ora la riflettivitá è 1 per tutte le energie, in seguito si potrá aggiung
 ### Codice
 
 Implementazione: `src/DetectorConstruction.cc`
+
+## 08-07 -- Re-organize DetectorConstruction
+
+### Obiettivo
+
+Riscrivere la forma della classe `DetectorConstructor` usando anche metodi e altri field privati ausiliari per ottenre una forma piú leggibile e facilmente riscalabile di `Construct()`.
+
+### Scelta progettuale
+
+Sono state implementati altri metodi privati che costruiscono ogni parte dell'intero apparato da simulare, in modo che l'implementazione della funzione `Construct()` risultasse piú leggibile, minimale ed ordinata.
+
+Ogni funzione implementa blocchi di codice giá presenti, semplicemente sono riorganizzati in diversi blocchi e con diverse variabili.
+
+### Note
+
+L'idea é anche di rendere piú facile il riscalamento per aggiungere e/o modificare diverse parti della geometria.
+
+### Codice
+
+Header: `DetectorConstruction.hh`
+
+Implementazione: `DetectorConstruction.cc`
