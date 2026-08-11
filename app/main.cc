@@ -1,5 +1,5 @@
-#include "na62rich/DetectorConstruction.hh"
-#include "na62rich/ActionInitialization.hh"
+#include "na62rich/detector/DetectorConstruction.hh"
+#include "na62rich/actions/ActionInitialization.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"

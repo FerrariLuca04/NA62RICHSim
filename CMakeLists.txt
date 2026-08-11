@@ -17,11 +17,9 @@ find_package(
 add_executable(
     na62_rich_sim
     app/main.cc
-    src/DetectorConstruction.cc
-    src/PhotonSensitiveDetector.cc
-    src/PrimaryGeneratorAction.cc
-    src/ActionInitialization.cc
 )
+
+add_subdirectory(src)
 
 target_include_directories(
     na62_rich_sim

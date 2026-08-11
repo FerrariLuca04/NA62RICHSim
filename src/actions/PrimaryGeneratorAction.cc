@@ -1,4 +1,4 @@
-#include "na62rich/PrimaryGeneratorAction.hh"
+#include "na62rich/actions/PrimaryGeneratorAction.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleGun.hh"
