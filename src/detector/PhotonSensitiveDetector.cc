@@ -7,9 +7,31 @@
 #include "G4SystemOfUnits.hh"
 #include "G4Track.hh"
 
-PhotonSensitiveDetector::PhotonSensitiveDetector(const G4String& name)
-    : G4VSensitiveDetector(name)
-{}
+#include "G4SDManager.hh"
+
+PhotonSensitiveDetector::PhotonSensitiveDetector(const G4String& name) : G4VSensitiveDetector(name)
+{
+    collectionName.insert("PhotonHitsCollection");
+}
+
+void PhotonSensitiveDetector::Initialize(G4HCofThisEvent* hce)
+{
+    fHitsCollection = new PhotonHitsCollection(
+        SensitiveDetectorName,
+        collectionName[0]
+    );
+
+    if (fHitsCollectionID < 0) {
+        fHitsCollectionID =
+            G4SDManager::GetSDMpointer()
+                ->GetCollectionID(fHitsCollection);
+    }
+
+    hce->AddHitsCollection(
+        fHitsCollectionID,
+        fHitsCollection
+    );
+}
 
 G4bool PhotonSensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory* history)
 {
@@ -22,13 +44,22 @@ G4bool PhotonSensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory* hi
     }
 
     // Only the first step
-    if (step->GetPreStepPoint()->GetStepStatus() != fGeomBoundary)
+    auto* preStep = step->GetPreStepPoint();
+    if (preStep->GetStepStatus() != fGeomBoundary)
     {
         return false;
     }
 
-    const auto energytrack = track->GetTotalEnergy();
-    const auto position = track->GetPosition();
+    auto* hit = new PhotonHit;
+
+    hit->SetPosition(preStep->GetPosition());
+    hit->SetEnergy(track->GetKineticEnergy());
+
+    const auto sensorID = preStep->GetTouchableHandle()->GetCopyNumber();
+
+    hit->SetSensorID(sensorID);
+
+    fHitsCollection->insert(hit);
 
     track->SetTrackStatus(fStopAndKill);
 

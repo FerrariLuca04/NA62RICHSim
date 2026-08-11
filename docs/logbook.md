@@ -341,3 +341,59 @@ SetSensitiveDetector(
 Header: `DetectorConstruction.hh` `PhotonSensitiveDetector.hh`
 
 Implementazione: `DetectorConstruction.cc` `PhotonSensitiveDetector.cc`
+
+## 11-08 -- Defining PhotonHit
+
+### Obiettivo
+
+Implementare una classe per imaggazzinare le informazioni delle hit sul volume sensibile.
+
+### Scelta progettuale
+
+Si è definita la classe `PhotonHit` derivata da `G4VHit` con tre campi: `fPosition`, `fEnergy` e `fSensorID`, ovvero la posizione e l'energia del fotone quando entra nel volume sensibile, e l'ID del sensore.
+
+### Note
+
+Ad ora l'ID puó essere solo 0 in quanto c'è solo un volume sensibile.
+
+### Codice
+
+Implementazione: `PhotonHit.hh` `PhotonSensitiveDetector.cc`
+
+## 11-08 -- Implementing EventAction
+
+### Obiettivo
+
+Implementare la classe `EventAction` e definire il metodo `EndOfEventAction`, necessario per registrare una "lista" di hit da poi salvare in un file di output.
+
+### Scelta progettuale
+
+Seguendo vari esempi, si dichiara una classe `EventAction` derivata da `G4UserEventAction`. Il Metodo piú importante è `EndOfEventAction` che viene eseguito alla fine di ogni evento.
+
+Il metodo `EndOfEventAction` va a registrare l'ID della "hit collection" registrata dal "sensitive detector" (che viene generata e riempita con `ProcessHit`)
+```c++
+if (fPhotonHitsCollectionID < 0)
+{
+    fPhotonHitsCollectionID = 
+        G4SDManager::GetSDMpointer()->GetCollectionID("PhotonHitsCollection");
+}
+```
+Poi registra la "hit collection" in un `static_cast<PhotonHitsCollection*>`
+```c++
+auto* hitsCollection = 
+    static_cast<PhotonHitsCollection*>(
+        hce->GetHC(fPhotonHitsCollectionID)
+    );
+```
+### Note
+
+L'oggetto `PhotonHitsCollection` vine definito in `PhotonHit.hh`con la riga
+```c++
+using PhotonHitsCollection = G4THitsCollection<PhotonHit>;
+```
+
+### Codice
+
+Header: `EventAction.hh`
+
+Implemmentazione: `EventAction.cc` `PhotonHit.hh`

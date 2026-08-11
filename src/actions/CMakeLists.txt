@@ -5,4 +5,5 @@ target_sources(
     PRIVATE
         ActionInitialization.cc
         PrimaryGeneratorAction.cc
+        EventAction.cc
 )
