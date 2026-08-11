@@ -6,4 +6,5 @@ target_sources(
         ActionInitialization.cc
         PrimaryGeneratorAction.cc
         EventAction.cc
+        RunAction.cc
 )

@@ -31,4 +31,40 @@ void EventAction::EndOfEventAction(const G4Event* event)
     {
         return;
     }
+
+    auto* analysisManager =
+        G4AnalysisManager::Instance();
+
+    for (std::size_t i = 0; i < hitsCollection->entries(); ++i)
+    {
+        const auto* hit = (*hitsCollection)[i];
+
+        analysisManager->FillNtupleIColumn(
+            0,
+            event->GetEventID()
+        );
+
+        analysisManager->FillNtupleIColumn(
+            1,
+            hit->GetSensorID()
+        );
+
+        analysisManager->FillNtupleDColumn(
+            2,
+            hit->GetPosition().x() / mm
+        );
+
+        analysisManager->FillNtupleDColumn(
+            3,
+            hit->GetPosition().y() / mm
+        );
+
+        analysisManager->FillNtupleDColumn(
+            4,
+            hit->GetEnergy() / eV
+        );
+
+        analysisManager->AddNtupleRow();
+    }
+
 }
