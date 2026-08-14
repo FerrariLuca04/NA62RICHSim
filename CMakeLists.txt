@@ -14,6 +14,14 @@ find_package(
     vis_all
 )
 
+find_package(
+    ROOT REQUIRED
+    COMPONENTS
+        Core
+        RIO
+        Tree
+)
+
 add_executable(
     na62_rich_sim
     app/main.cc
@@ -37,6 +45,10 @@ target_link_libraries(
     na62_rich_sim
     PRIVATE
         ${Geant4_LIBRARIES}
+
+        ROOT::Core
+        ROOT::RIO
+        ROOT::Tree
 )
 
 set_target_properties(

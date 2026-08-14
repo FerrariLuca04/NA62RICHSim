@@ -1,5 +1,7 @@
 #include "na62rich/actions/RunAction.hh"
 
+#include "na62rich/io/OutputPaths.hh"
+
 #include "G4AnalysisManager.hh"
 #include "G4Run.hh"
 
@@ -27,7 +29,7 @@ void RunAction::BeginOfRunAction(const G4Run*)
     auto* analysisManager =
         G4AnalysisManager::Instance();
 
-    analysisManager->OpenFile("photon_hits.root");
+    analysisManager->OpenFile(tmpFile.string());
 }
 
 void RunAction::EndOfRunAction(const G4Run*)
