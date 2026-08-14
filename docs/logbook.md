@@ -397,3 +397,118 @@ using PhotonHitsCollection = G4THitsCollection<PhotonHit>;
 Header: `EventAction.hh`
 
 Implemmentazione: `EventAction.cc` `PhotonHit.hh`
+
+## 11-08 -- Implementing RunAction
+
+### Obiettivo
+
+Si deve implementare la classe `RunAction` che tramite con i sui metodi permette di scrivere il file di output.
+
+### Scelta progettuale
+
+Si definisce la classe `RunAction` derivata da `G4UserRunAction`. Con il costruttore si definisce una Ntupla che poi fará da struttura centrale al file di output.
+```c++
+RunAction::RunAction()
+{
+    auto* analysisManager = G4AnalysisManager::Instance();
+
+    analysisManager->CreateNtuple(
+        "PhotonHits",
+        "Detected optical photons"
+    );
+
+    analysisManager->CreateNtupleIColumn("eventID");
+    analysisManager->CreateNtupleIColumn("sensorID");
+    
+    analysisManager->CreateNtupleDColumn("x_mm");
+    analysisManager->CreateNtupleDColumn("y_mm");
+    analysisManager->CreateNtupleDColumn("energy_eV");
+
+    analysisManager->FinishNtuple();
+}
+```
+Invece i metodi `BeginOfRunAction` e `EndOfRunAction` aprono il file con `analysisManager->OpenFile(tmpFile.string())`, lo riempiono con `analysisManager->Write()` e lo chiudono `analyssManager->CloseFile()`.
+
+In `EventAction::EndOfEventAction()` invece si fa a riempire la Ntupla con
+```c++
+analysisManager->FillNtupleIColumn(
+    /* colonna da riempire */,
+    /* contenuto */
+)
+```
+e infine si scrive la riga con `analysisManager->AddNtupleRow`.
+
+### Note
+
+In MultiTread la simulazione genera un file per ogni processo parallelizzato, in seguito vannu fusi insieme per avere un unico file.
+Sia `RunAction` che `EventAction` per farli funzionare devono essere inseriti in `ActionInitialization::Build()` usando `SetUserAction(//argomento)`.
+
+### Codice
+
+Header: `RunAction.hh`
+
+Implementazione: `RunAction.cc` `EventAction.cc` `ActionInitialization`
+
+## 14-08 -- Merger Root files
+
+### Obiettivo
+
+Implementare un codice per mergiare i file temporanei restituiti da `RunAction` in un unico file di output.
+
+### Scelta progettuale
+
+Si è definita una funzione `MergeRootFile` che cerca nella cartella dei file temporanei tutti i file con il nome "photon_hits_t*.root" e vengono mergiati usando `TMerger` di ROOT.
+
+1)
+```c++
+TFileMerger merger;
+merger.OutputFile(outputFile.string().c_str());
+```
+Il comando setta il file di output finale.
+
+2)
+```c++
+for (const auto& entry :
+         std::filesystem::directory_iterator(tmpDirectory))
+{
+    if (!entry.is_regular_file()) {
+        continue;
+    }
+
+// continua...
+```
+si cicla sulla cartella dei file temporanei e si cercano i file contenuti
+
+3)
+```c++
+// ...il continuo
+
+    const auto filename =
+        entry.path().filename().string();
+
+    if (filename.starts_with("photon_hits_t") &&
+        filename.ends_with(".root"))
+    {
+        std::cout
+            << "Adding " << filename
+            << '\n';
+
+        merger.AddFile(
+            entry.path().string().c_str()
+        );
+    }
+}
+```
+Se è un file temporaneo allora si aggiunge al merger tramire `merger.AddFile()`.
+
+La funzione `MergeRootFile()` viene utilizzata nel `main.cc` quando termina la simulazione.
+
+### Note
+
+Per ora le directory sono tutte definite in un header a parte, in seguito si puó aggiungere un ConfigDir per poter configurare altri path per i file.
+
+### Codice
+
+Header: `OutputPaths.hh` `RootFileMerger.hh`
+
+Implementazione: `RootFileMerger.hh` `main.cc`

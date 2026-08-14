@@ -32,8 +32,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
         return;
     }
 
-    auto* analysisManager =
-        G4AnalysisManager::Instance();
+    auto* analysisManager = G4AnalysisManager::Instance();
 
     for (std::size_t i = 0; i < hitsCollection->entries(); ++i)
     {
