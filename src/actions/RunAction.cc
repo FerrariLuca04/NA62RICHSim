@@ -24,18 +24,23 @@ RunAction::RunAction()
     analysisManager->FinishNtuple();
 }
 
-void RunAction::BeginOfRunAction(const G4Run*)
+void RunAction::BeginOfRunAction(const G4Run* run)
 {
-    auto* analysisManager =
-        G4AnalysisManager::Instance();
+    auto* analysisManager = G4AnalysisManager::Instance();
 
-    analysisManager->OpenFile(tmpFile.string());
+    const auto file =
+        tmpDirectory /
+        (tmpFileName +
+        "_run" +
+        std::to_string(run->GetRunID()) +
+        ".root");
+
+    analysisManager->OpenFile(file.string());
 }
 
-void RunAction::EndOfRunAction(const G4Run*)
+void RunAction::EndOfRunAction(const G4Run* run)
 {
-    auto* analysisManager =
-        G4AnalysisManager::Instance();
+    auto* analysisManager = G4AnalysisManager::Instance();
 
     analysisManager->Write();
     analysisManager->CloseFile();

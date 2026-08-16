@@ -12,7 +12,7 @@ inline const std::filesystem::path tmpDirectory =
 inline const std::filesystem::path outputFile =
     outputDirectory / "data_na62rich_sim.root";
 
-inline const std::filesystem::path tmpFile =
-    tmpDirectory / "photon_hits.root";
+inline const std::string tmpFileName =
+    "photon_hits";
 
 #endif
