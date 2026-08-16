@@ -5,6 +5,8 @@
 #include "G4Tubs.hh"
 #include "G4Box.hh"
 #include "G4Sphere.hh"
+#include "G4IntersectionSolid.hh"
+#include "G4RotationMatrix.hh"
 
 #include "G4LogicalVolume.hh"
 #include "G4NistManager.hh"
@@ -28,7 +30,8 @@ constexpr G4double gasLength = 20.0 * m;
 constexpr G4double mirrorCurvatureRadius = 40.0 * m;
 constexpr G4double mirrorThickness       = 2.5 * cm;
 constexpr G4double mirrorApertureRadius  = 1.5 * m;
-const G4double mirrorThetaMax = std::asin(mirrorApertureRadius / mirrorCurvatureRadius); // Angular size of the spherical cap
+constexpr G4double mirrorInnerRadius  = 10.0 * cm;
+const G4double mirrorThetaMax = std::asin(3.0 * mirrorApertureRadius / mirrorCurvatureRadius); // Angular size of the spherical cap
 // PMTs dimensions
 constexpr G4double photonSDRadius = 1.45 * m;
 constexpr G4double photonSDThick = 1 * mm;
@@ -223,9 +226,9 @@ G4LogicalVolume* DetectorConstruction::BuildGas(G4LogicalVolume* mother)
 void DetectorConstruction::BuildMirror(G4LogicalVolume* mother)
 {    
     // Solid
-    auto* mirrorSolid =
+    auto* sphericalShell =
         new G4Sphere(
-            "Mirror",
+            "Spherical Shell",
             mirrorCurvatureRadius - mirrorThickness,
             mirrorCurvatureRadius,
             0.0,
@@ -233,6 +236,22 @@ void DetectorConstruction::BuildMirror(G4LogicalVolume* mother)
             0.0,
             mirrorThetaMax
         );
+    auto* cutter =
+        new G4Tubs(
+            "Cutter",
+            mirrorInnerRadius,
+            mirrorApertureRadius,
+            1.0 * m,
+            0.0,
+            pi
+        );
+    auto* mirrorSolid = new G4IntersectionSolid(
+        "Mirror",
+        sphericalShell,
+        cutter,
+        nullptr,
+        G4ThreeVector(0.0, mirrorApertureRadius / -2.0, mirrorCurvatureRadius)
+    );
 
     // Logical volume
     auto* mirrorLogical =
@@ -245,24 +264,50 @@ void DetectorConstruction::BuildMirror(G4LogicalVolume* mother)
     // Physical volume
     const G4double mirrorVertexZ = gasLength / 2.0 - 1.0 * cm;
     const G4double mirrorCenterZ = mirrorVertexZ - mirrorCurvatureRadius;
+    
+    /* Juna */
+    auto* rotationJuna = new G4RotationMatrix();
+    rotationJuna->rotateZ(pi/2.0);
 
-    auto* mirrorPhysical =
+    auto* junaPhysical =
         new G4PVPlacement(
-            nullptr,
-            G4ThreeVector(0.0, 0.0, mirrorCenterZ),
+            rotationJuna,
+            G4ThreeVector(mirrorApertureRadius / 2.0, 0.0, mirrorCenterZ),
             mirrorLogical,
-            "Mirror",
+            "Juna",
             mother,
             false,
             0,
             true
         );
     
+    /* Saleve */
+    auto* rotationSaleve = new G4RotationMatrix();
+    rotationSaleve->rotateZ(3.0 * pi/2.0);
+
+    auto* salevePhysical =
+        new G4PVPlacement(
+            rotationSaleve,
+            G4ThreeVector(-1.0 * mirrorApertureRadius / 2.0, 0.0, mirrorCenterZ),
+            mirrorLogical,
+            "Saleve",
+            mother,
+            false,
+            1,
+            true
+        );
+    
     // Border surface
     new G4LogicalBorderSurface(
-        "NeonToMirrorSurface",
+        "NeonToMirrorSurfaceJ",
         fGasPhysical,
-        mirrorPhysical,
+        junaPhysical,
+        fMirrorSurface
+    );
+    new G4LogicalBorderSurface(
+        "NeonToMirrorSurfaceS",
+        fGasPhysical,
+        salevePhysical,
         fMirrorSurface
     );
 }
