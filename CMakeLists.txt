@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
     NA62RICHSim
-    VERSION 0.3.0
+    VERSION 0.3.3
     DESCRIPTION "Educational Geant4 simulation of the NA62 RICH detector"
     LANGUAGES CXX
 )
@@ -14,14 +14,20 @@ find_package(
     vis_all
 )
 
+find_package(
+    ROOT REQUIRED
+    COMPONENTS
+        Core
+        RIO
+        Tree
+)
+
 add_executable(
     na62_rich_sim
     app/main.cc
-    src/DetectorConstruction.cc
-    src/PhotonSensitiveDetector.cc
-    src/PrimaryGeneratorAction.cc
-    src/ActionInitialization.cc
 )
+
+add_subdirectory(src)
 
 target_include_directories(
     na62_rich_sim
@@ -39,6 +45,10 @@ target_link_libraries(
     na62_rich_sim
     PRIVATE
         ${Geant4_LIBRARIES}
+
+        ROOT::Core
+        ROOT::RIO
+        ROOT::Tree
 )
 
 set_target_properties(

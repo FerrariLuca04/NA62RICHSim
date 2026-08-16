@@ -1,6 +1,6 @@
-#include "na62rich/DetectorConstruction.hh"
+#include "na62rich/detector/DetectorConstruction.hh"
 
-#include "na62rich/PhotonSensitiveDetector.hh"
+#include "na62rich/detector/PhotonSensitiveDetector.hh"
 
 #include "G4Tubs.hh"
 #include "G4Box.hh"

@@ -1,0 +1,47 @@
+#include "na62rich/actions/RunAction.hh"
+
+#include "na62rich/io/OutputPaths.hh"
+
+#include "G4AnalysisManager.hh"
+#include "G4Run.hh"
+
+RunAction::RunAction()
+{
+    auto* analysisManager = G4AnalysisManager::Instance();
+
+    analysisManager->CreateNtuple(
+        "PhotonHits",
+        "Detected optical photons"
+    );
+
+    analysisManager->CreateNtupleIColumn("eventID");
+    analysisManager->CreateNtupleIColumn("sensorID");
+    
+    analysisManager->CreateNtupleDColumn("x_mm");
+    analysisManager->CreateNtupleDColumn("y_mm");
+    analysisManager->CreateNtupleDColumn("energy_eV");
+
+    analysisManager->FinishNtuple();
+}
+
+void RunAction::BeginOfRunAction(const G4Run* run)
+{
+    auto* analysisManager = G4AnalysisManager::Instance();
+
+    const auto file =
+        tmpDirectory /
+        (tmpFileName +
+        "_run" +
+        std::to_string(run->GetRunID()) +
+        ".root");
+
+    analysisManager->OpenFile(file.string());
+}
+
+void RunAction::EndOfRunAction(const G4Run* run)
+{
+    auto* analysisManager = G4AnalysisManager::Instance();
+
+    analysisManager->Write();
+    analysisManager->CloseFile();
+}
