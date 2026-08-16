@@ -293,7 +293,7 @@ void DetectorConstruction::BuildMirror(G4LogicalVolume* mother)
             "Saleve",
             mother,
             false,
-            1,
+            0,
             true
         );
     

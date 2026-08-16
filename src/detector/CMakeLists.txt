@@ -5,4 +5,5 @@ target_sources(
     PRIVATE
         DetectorConstruction.cc
         PhotonSensitiveDetector.cc
+        CustomDetector.cc
 )

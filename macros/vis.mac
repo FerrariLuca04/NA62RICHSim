@@ -22,6 +22,11 @@
 /vis/geometry/set/colour World    0 0.7 0.7 0.7 0.1
 /vis/geometry/set/colour Gas  0 0.0 1.0 0.0 1.0
 
+/vis/set/touchable World 0 Gas 0 Juna 0
+/vis/touchable/set/colour 0.05 0.20 0.70 1.0
+/vis/set/touchable World 0 Gas 0 Saleve 0
+/vis/touchable/set/colour 0.70 0.15 0.40 1.0
+
 # Initial camera direction
 /vis/viewer/set/viewpointThetaPhi 60 30
 
