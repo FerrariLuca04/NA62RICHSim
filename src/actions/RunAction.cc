@@ -28,7 +28,9 @@ RunAction::RunAction()
     analysisManager->CreateNtupleDColumn("primary_vertex_z_m");
 
     analysisManager->CreateNtupleIColumn("sensorIDs", fSensorIDs);
-    
+    analysisManager->CreateNtupleDColumn("sensor_pos_x_mm", fSensorPosX);
+    analysisManager->CreateNtupleDColumn("sensor_pos_y_mm", fSensorPosY);
+
     analysisManager->CreateNtupleDColumn("hit_x_mm", fHitX);
     analysisManager->CreateNtupleDColumn("hit_y_mm", fHitY);
     analysisManager->CreateNtupleDColumn("hit_energy_eV", fHitEnergy);

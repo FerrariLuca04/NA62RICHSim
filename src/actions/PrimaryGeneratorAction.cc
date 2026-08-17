@@ -20,7 +20,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
         G4ThreeVector(0.0, 0.0, 1.0)
     );
     particleGun_->SetParticlePosition(
-        G4ThreeVector(0.0, 0.0, -15.0 * m)
+        G4ThreeVector(0.7 * m, 0.0, -15.0 * m)
     );
 }
 

@@ -18,6 +18,12 @@ class RunAction : public G4UserRunAction {
         std::vector<G4int>& GetSensorIDs() {
             return fSensorIDs;
         }
+        std::vector<G4double>& GetSensorPosX() {
+            return fSensorPosX;
+        }
+        std::vector<G4double>& GetSensorPosY() {
+            return fSensorPosY;
+        }
         std::vector<G4double>& GetHitX() {
             return fHitX;
         }
@@ -30,6 +36,8 @@ class RunAction : public G4UserRunAction {
 
         private:
             std::vector<G4int> fSensorIDs;
+            std::vector<G4double> fSensorPosX;
+            std::vector<G4double> fSensorPosY;
             std::vector<G4double> fHitX;
             std::vector<G4double> fHitY;
             std::vector<G4double> fHitEnergy;

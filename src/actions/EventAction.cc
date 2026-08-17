@@ -18,6 +18,9 @@ void EventAction::BeginOfEventAction(const G4Event* event)
 {
     fRunAction->GetSensorIDs().clear();
 
+    fRunAction->GetSensorPosX().clear();
+    fRunAction->GetSensorPosY().clear();
+
     fRunAction->GetHitX().clear();
     fRunAction->GetHitY().clear();
 
@@ -137,6 +140,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
     /*********************************************************/
 
     auto& sensorIDs = fRunAction->GetSensorIDs();
+    auto& sensorPosX = fRunAction->GetSensorPosX();
+    auto& sensorPosY = fRunAction->GetSensorPosY();
+    
     auto& hitX = fRunAction->GetHitX();
     auto& hitY = fRunAction->GetHitY();
     auto& hitEnergy = fRunAction->GetHitEnergy();
@@ -148,6 +154,13 @@ void EventAction::EndOfEventAction(const G4Event* event)
         /*********************************************************/
         sensorIDs.push_back(
             hit->GetSensorID()
+        );
+        /*********************************************************/
+        sensorPosX.push_back(
+            hit->GetSensorPosition().x() / mm
+        );
+        sensorPosY.push_back(
+            hit->GetSensorPosition().y() / mm
         );
         /*********************************************************/
         hitX.push_back(
