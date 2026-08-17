@@ -6,4 +6,8 @@ target_sources(
         DetectorConstruction.cc
         PhotonSensitiveDetector.cc
         CustomDetector.cc
+        World.cc
+        GasDetector.cc
+        MirrorDetector.cc
+        PMTdetector.cc
 )

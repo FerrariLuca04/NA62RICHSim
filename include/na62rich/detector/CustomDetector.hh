@@ -1,5 +1,5 @@
-#ifndef CUSTOM_DETECTOR_HH
-#define CUSTOM_DETECTOR_HH
+#ifndef NA62RICH_CUSTOM_DETECTOR_HH
+#define NA62RICH_CUSTOM_DETECTOR_HH
 
 #include <string>
 #include <vector>

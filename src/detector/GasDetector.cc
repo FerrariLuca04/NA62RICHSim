@@ -1,12 +1,24 @@
 #include "na62rich/detector/GasDetector.hh"
 
+#include "na62rich/detector/GasDetector.hh"
+
+#include "G4NistManager.hh"
+#include "G4Material.hh"
+#include "G4MaterialPropertiesTable.hh"
+
+#include "G4Tubs.hh"
+#include "G4PVPlacement.hh"
+
+#include "G4SystemOfUnits.hh"
+#include "G4PhysicalConstants.hh"
+
 GasDetector::GasDetector(G4double radius, G4double length) : fRadius(radius), fLength(length)
 {}
 
 G4Material* GasDetector::CreateMaterial()
 {
     auto* nist = G4NistManager::Instance();
-    gasMaterial = nist->FindOrBuildMaterial("G4_Ne");
+    auto* gasMaterial = nist->FindOrBuildMaterial("G4_Ne");
 
     std::vector<G4double> photonEnergy = {
         1.5 * eV,
@@ -42,25 +54,25 @@ G4VSolid* GasDetector::CreateSolid(std::string name)
             twopi
         );
 
-        return gasSolid;
+    return gasSolid;
 }
 
-std::vector<G4VPhysicalVolume*> CustomDetector::Place(G4LogicalVolume* mother, G4LogicalVolume* logical, std::string name)
+std::vector<G4VPhysicalVolume*> GasDetector::Place(G4LogicalVolume* mother, G4LogicalVolume* logical, std::string name)
 {
     std::vector<G4VPhysicalVolume*> physicalList;
     auto* physical =
         new G4PVPlacement(
             nullptr,
             G4ThreeVector(),
-            gasLogical,
-            "Gas",
+            logical,
+            name,
             mother,
             false,
             0,
             true
         );
     
-    physicalList.pushback(physical)
+    physicalList.push_back(physical);
 
     return physicalList;
 }

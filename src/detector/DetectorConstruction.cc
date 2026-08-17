@@ -2,6 +2,11 @@
 
 #include "na62rich/detector/PhotonSensitiveDetector.hh"
 
+#include "na62rich/detector/World.hh"
+#include "na62rich/detector/GasDetector.hh"
+#include "na62rich/detector/MirrorDetector.hh"
+#include "na62rich/detector/PMTdetector.hh"
+
 #include "G4Tubs.hh"
 #include "G4Box.hh"
 #include "G4Sphere.hh"
@@ -30,26 +35,73 @@ constexpr G4double gasLength = 20.0 * m;
 constexpr G4double mirrorCurvatureRadius = 40.0 * m;
 constexpr G4double mirrorThickness       = 2.5 * cm;
 constexpr G4double mirrorApertureRadius  = 1.5 * m;
-constexpr G4double mirrorInnerRadius  = 10.0 * cm;
-const G4double mirrorThetaMax = std::asin(3.0 * mirrorApertureRadius / mirrorCurvatureRadius); // Angular size of the spherical cap
+constexpr G4double mirrorInnerRadius     = 10.0 * cm;
+constexpr G4double mirrorPosZ = 20 * m / 2.0;
 // PMTs dimensions
-constexpr G4double photonSDRadius = 1.45 * m;
-constexpr G4double photonSDThick = 1 * mm;
+constexpr G4double photonSDRadius  = 0.5 * m;
+constexpr G4double PMTradius  = 1.0 * cm;
+constexpr G4double photonSDThick   = 1 * mm;
+constexpr G4double photonSDPosZ = -20.0 * m / 2.0;
+constexpr G4double photonSDPosR = 0.75 * m;
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
-{
-    // Defining materials
-    DefineMaterials();
-    AddOpticalProperties();
+{   
+    // Build World
+    fWorld = new World(
+        worldHeigth,
+        worldHeigth,
+        worldLength
+    );
+    fWorld->Construct(
+        nullptr,
+        "World"
+    );
+    
+    // Build Gas
+    fGas = new GasDetector(
+        gasRadius,
+        gasLength
+    );
+    fGas->Construct(
+        fWorld->GetLogical(),
+        "Gas"
+    );
+    
+    // Build Mirror
+    fMirror = new MirrorDetector(
+        mirrorCurvatureRadius,
+        mirrorInnerRadius,
+        mirrorApertureRadius,
+        mirrorThickness,
+        mirrorPosZ
+    );
+    fMirror->Construct(
+        fGas->GetLogical(),
+        "Mirror"
+    );
+    for (int i = 0; i < 2; ++i) {
+        fMirror->SetSurface(
+            fGas->GetPhysical()[0],
+            fMirror->GetPhysical()[i]
+        );
+    }
 
-    // Build geometry
-    auto* worldLogical = BuildWorld();
-    auto* gasLogical = BuildGas(worldLogical);
+    // Build PMT
+    fPMT = new PMTdetector(
+        photonSDRadius,
+        PMTradius,
+        photonSDThick,
+        photonSDPosZ,
+        photonSDPosR
+    );
+    fPMT->Construct(
+        fGas->GetLogical(),
+        "PMT"
+    );
 
-    BuildMirror(gasLogical);
-    BuildPhotonSD(gasLogical);
+    std::vector<G4VPhysicalVolume*> physicListWorld = fWorld->GetPhysical();
 
-    return fWorldPhysical;
+    return physicListWorld[0];
 }
 void DetectorConstruction::ConstructSDandField()
 {
@@ -60,291 +112,7 @@ void DetectorConstruction::ConstructSDandField()
     sdManager->AddNewDetector(photonSD);
 
     SetSensitiveDetector(
-        fPhotonSDLogical,
+        fPMT->GetLogical(),
         photonSD
     );
-}
-
-
-
-void DetectorConstruction::DefineMaterials()
-{
-    auto* nist = G4NistManager::Instance();
-
-    // World
-    fWorldMaterial =
-        nist->FindOrBuildMaterial("G4_Galactic");
-    // Gas
-    fGasMaterial =
-        nist->FindOrBuildMaterial("G4_Ne");
-    // Mirror
-    fMirrorMaterial =
-        nist->FindOrBuildMaterial("G4_GLASS_PLATE");
-    // PMTs
-    fPhotonSDMaterial =
-        nist->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
-}
-void DetectorConstruction::AddOpticalProperties()
-{
-    std::vector<G4double> photonEnergy = {
-        1.5 * eV,
-        10.0 * eV
-    };
-
-    // Gas Neon
-    std::vector<G4double> refractiveIndexGas = {
-        1.000067,
-        1.000067
-    };
-
-    auto* gasMPT =
-        new G4MaterialPropertiesTable();
-
-    gasMPT->AddProperty(
-        "RINDEX",
-        photonEnergy,
-        refractiveIndexGas
-    );
-
-    fGasMaterial->SetMaterialPropertiesTable(gasMPT);
-
-
-    // Mirror
-    std::vector<G4double> reflectivityMirror = {
-        1.0,
-        1.0
-    };
-    
-    fMirrorSurface =
-        new G4OpticalSurface("MirrorSurface");
-
-    fMirrorSurface->SetType(dielectric_metal);
-    fMirrorSurface->SetModel(unified);
-    fMirrorSurface->SetFinish(polished);
-
-    auto* mirrorMPT =
-        new G4MaterialPropertiesTable();
-
-    mirrorMPT->AddProperty(
-        "REFLECTIVITY",
-        photonEnergy,
-        reflectivityMirror
-    );
-
-    fMirrorSurface->SetMaterialPropertiesTable(mirrorMPT);
-
-
-    // PMTs
-    std::vector<G4double> refractiveIndexPhotonSD = {
-        1.0,
-        1.0
-    };
-
-    auto* photonSDMPT = 
-        new G4MaterialPropertiesTable();
-
-    photonSDMPT->AddProperty(
-        "RINDEX",
-        photonEnergy,
-        refractiveIndexPhotonSD
-    );
-
-    fPhotonSDMaterial->SetMaterialPropertiesTable(photonSDMPT);
-}
-
-G4LogicalVolume* DetectorConstruction::BuildWorld()
-{
-    // Solid
-    auto* worldSolid =
-        new G4Box(
-            "World",
-            worldHeigth / 2.0,
-            worldHeigth / 2.0,
-            worldLength / 2.0
-        );
-
-    // Logical volume
-    auto* worldLogical =
-        new G4LogicalVolume(
-            worldSolid,
-            fWorldMaterial,
-            "World"
-        );
-
-    // Physical volume
-    fWorldPhysical =
-        new G4PVPlacement(
-            nullptr,
-            G4ThreeVector(),
-            worldLogical,
-            "World",
-            nullptr,
-            false,
-            0
-        );
-    
-    return worldLogical;
-}
-
-G4LogicalVolume* DetectorConstruction::BuildGas(G4LogicalVolume* mother)
-{    
-    // Solid
-    auto* gasSolid =
-        new G4Tubs(
-            "Gas",
-            0.0,
-            gasRadius,
-            gasLength / 2.0,
-            0.0,
-            twopi
-        );
-
-    // Logical Volume
-    auto* gasLogical =
-        new G4LogicalVolume(
-            gasSolid,
-            fGasMaterial,
-            "Gas"
-        );
-
-    // Physical Volume
-    fGasPhysical =
-        new G4PVPlacement(
-            nullptr,
-            G4ThreeVector(),
-            gasLogical,
-            "Gas",
-            mother,
-            false,
-            0,
-            true
-        );
-    
-    return gasLogical;
-}
-
-void DetectorConstruction::BuildMirror(G4LogicalVolume* mother)
-{    
-    // Solid
-    auto* sphericalShell =
-        new G4Sphere(
-            "Spherical Shell",
-            mirrorCurvatureRadius - mirrorThickness,
-            mirrorCurvatureRadius,
-            0.0,
-            twopi,
-            0.0,
-            mirrorThetaMax
-        );
-    auto* cutter =
-        new G4Tubs(
-            "Cutter",
-            mirrorInnerRadius,
-            mirrorApertureRadius,
-            1.0 * m,
-            0.0,
-            pi
-        );
-    auto* mirrorSolid = new G4IntersectionSolid(
-        "Mirror",
-        sphericalShell,
-        cutter,
-        nullptr,
-        G4ThreeVector(0.0, mirrorApertureRadius / -2.0, mirrorCurvatureRadius)
-    );
-
-    // Logical volume
-    auto* mirrorLogical =
-        new G4LogicalVolume(
-            mirrorSolid,
-            fMirrorMaterial,
-            "Mirror"
-        );
-
-    // Physical volume
-    const G4double mirrorVertexZ = gasLength / 2.0 - 1.0 * cm;
-    const G4double mirrorCenterZ = mirrorVertexZ - mirrorCurvatureRadius;
-    
-    /* Juna */
-    auto* rotationJuna = new G4RotationMatrix();
-    rotationJuna->rotateZ(pi/2.0);
-
-    auto* junaPhysical =
-        new G4PVPlacement(
-            rotationJuna,
-            G4ThreeVector(mirrorApertureRadius / 2.0, 0.0, mirrorCenterZ),
-            mirrorLogical,
-            "Juna",
-            mother,
-            false,
-            0,
-            true
-        );
-    
-    /* Saleve */
-    auto* rotationSaleve = new G4RotationMatrix();
-    rotationSaleve->rotateZ(3.0 * pi/2.0);
-
-    auto* salevePhysical =
-        new G4PVPlacement(
-            rotationSaleve,
-            G4ThreeVector(-1.0 * mirrorApertureRadius / 2.0, 0.0, mirrorCenterZ),
-            mirrorLogical,
-            "Saleve",
-            mother,
-            false,
-            0,
-            true
-        );
-    
-    // Border surface
-    new G4LogicalBorderSurface(
-        "NeonToMirrorSurfaceJ",
-        fGasPhysical,
-        junaPhysical,
-        fMirrorSurface
-    );
-    new G4LogicalBorderSurface(
-        "NeonToMirrorSurfaceS",
-        fGasPhysical,
-        salevePhysical,
-        fMirrorSurface
-    );
-}
-
-void DetectorConstruction::BuildPhotonSD(G4LogicalVolume* mother)
-{
-    // Solid
-    auto* photonSDSolid =
-        new G4Tubs(
-            "PMTs",
-            0.0,
-            photonSDRadius,
-            photonSDThick / 2.0,
-            0.0,
-            twopi
-        );
-    
-    // Logical
-    fPhotonSDLogical =
-        new G4LogicalVolume(
-            photonSDSolid,
-            fPhotonSDMaterial,
-            "PMTs"
-        );
-
-    // Physical
-    const G4double photonSDVertexZ = -1.0 * (gasLength - photonSDThick) / 2.0;
-
-    auto* photonSDPhysical =
-        new G4PVPlacement(
-            nullptr,
-            G4ThreeVector(0.0, 0.0, photonSDVertexZ),
-            fPhotonSDLogical,
-            "PMTs",
-            mother,
-            false,
-            0,
-            true
-        );
 }

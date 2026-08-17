@@ -3,9 +3,11 @@
 
 #include "G4VUserDetectorConstruction.hh"
 
-class G4Material;
-class G4OpticalSurface;
-class G4LogicalVolume;
+class World;
+class GasDetector;
+class MirrorDetector;
+class PMTdetector;
+
 class G4VPhysicalVolume;
 
 class DetectorConstruction : public G4VUserDetectorConstruction {
@@ -17,28 +19,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
         void ConstructSDandField();
 
     private:
-        G4VPhysicalVolume* fWorldPhysical = nullptr;
-
-        // Materials
-        void DefineMaterials();
-        void AddOpticalProperties();
-
-        G4Material* fWorldMaterial = nullptr;
-        G4Material* fGasMaterial = nullptr;
-        G4Material* fMirrorMaterial = nullptr;
-        G4OpticalSurface* fMirrorSurface = nullptr;
-        G4Material* fPhotonSDMaterial = nullptr;
-
-        // Shared volumes
-        G4VPhysicalVolume* fGasPhysical;
-        G4LogicalVolume* fPhotonSDLogical;
-
-        // Geometry builders
-        G4LogicalVolume* BuildWorld();
-        G4LogicalVolume* BuildGas(G4LogicalVolume* mother);
-
-        void BuildMirror(G4LogicalVolume* mother);
-        void BuildPhotonSD(G4LogicalVolume* mother);
+        World* fWorld = nullptr;
+        GasDetector* fGas = nullptr;
+        MirrorDetector* fMirror = nullptr;
+        PMTdetector* fPMT = nullptr;
 };
 
 #endif

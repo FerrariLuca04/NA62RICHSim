@@ -1,5 +1,5 @@
-#ifndef NA62RICH_GAS_VOLUME_HH
-#define NA62RICH_GAS_VOLUME_HH
+#ifndef NA62RICH_WORLD_HH
+#define NA62RICH_WORLD_HH
 
 #include "na62rich/detector/CustomDetector.hh"
 
@@ -8,16 +8,12 @@
 #include <string>
 #include <vector>
 
-class G4Material;
-class G4VSolid;
-class G4LogicalVolume;
-class G4VPhysicalVolume;
-
-class GasDetector : public CustomDetector {
+class World : public CustomDetector {
     public:
-        GasDetector(
-            G4double radius,
-            G4double length
+        World(
+            G4double dimX,
+            G4double dimY,
+            G4double dimZ
         );
 
     protected:
@@ -31,8 +27,9 @@ class GasDetector : public CustomDetector {
         ) override;
     
     private:
-        G4double fRadius;
-        G4double fLength;
+        G4double fDimX;
+        G4double fDimY;
+        G4double fDimZ;
 };
 
 #endif

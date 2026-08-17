@@ -26,3 +26,8 @@ Prima versione di scrittura per file output in un file `.root`.
 
 ### v.0.3.3 [16/08/26]:
 I file di output vengono mergiati in un unico file `.root` che contiene un unico `TTree`.
+
+### v.0.4.0 [17/08/26]:
+Nuova geometria piú realistica con due dischi con un mosaico di PMT a 'honeycomb' e due specchi con due assi di focalizzazione diversi,  a paralleli.
+
+Inoltre è stata definita una nuova classe `CustomDetector` da cui derivano le altre classi per la costruzioni delle singole parti del detector.
