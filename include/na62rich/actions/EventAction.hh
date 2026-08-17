@@ -5,16 +5,19 @@
 #include "globals.hh"
 
 class G4Event;
+class RunAction;
 
 class EventAction : public G4UserEventAction {
     public: 
-        EventAction() = default;
+        explicit EventAction(RunAction* runAction);
         ~EventAction() override = default;
 
+        void BeginOfEventAction(const G4Event* event) override;
         void EndOfEventAction(const G4Event* event) override;
 
     private:
         G4int fPhotonHitsCollectionID = -1;
+        RunAction* fRunAction;
 };
 
 #endif

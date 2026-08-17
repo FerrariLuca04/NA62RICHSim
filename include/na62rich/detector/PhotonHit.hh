@@ -20,6 +20,9 @@ class PhotonHit : public G4VHit {
         void SetSensorID(G4int sensorID) {
             fSensorID = sensorID;
         };
+        void SetSensorPosition(const G4ThreeVector& sensorPosition) {
+            fSensorPosition = sensorPosition;
+        };
 
 
         const G4ThreeVector& GetPosition() const {
@@ -31,11 +34,15 @@ class PhotonHit : public G4VHit {
         G4int GetSensorID() const {
             return fSensorID;
         };
+        const G4ThreeVector& GetSensorPosition() const {
+            return fSensorPosition;
+        };
 
     private:
         G4ThreeVector fPosition;
         G4double fEnergy = 0;
         G4int fSensorID = -1;
+        G4ThreeVector fSensorPosition;
 };
 
 using PhotonHitsCollection = G4THitsCollection<PhotonHit>;

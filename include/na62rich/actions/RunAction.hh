@@ -3,6 +3,8 @@
 
 #include "G4UserRunAction.hh"
 
+#include <vector>
+
 class G4Run;
 
 class RunAction : public G4UserRunAction {
@@ -12,6 +14,33 @@ class RunAction : public G4UserRunAction {
 
         void BeginOfRunAction(const G4Run* run) override;
         void EndOfRunAction(const G4Run* run) override;
+
+        std::vector<G4int>& GetSensorIDs() {
+            return fSensorIDs;
+        }
+        std::vector<G4double>& GetSensorPosX() {
+            return fSensorPosX;
+        }
+        std::vector<G4double>& GetSensorPosY() {
+            return fSensorPosY;
+        }
+        std::vector<G4double>& GetHitX() {
+            return fHitX;
+        }
+        std::vector<G4double>& GetHitY() {
+            return fHitY;
+        }
+        std::vector<G4double>& GetHitEnergy() {
+            return fHitEnergy;
+        }
+
+        private:
+            std::vector<G4int> fSensorIDs;
+            std::vector<G4double> fSensorPosX;
+            std::vector<G4double> fSensorPosY;
+            std::vector<G4double> fHitX;
+            std::vector<G4double> fHitY;
+            std::vector<G4double> fHitEnergy;
 };
 
 #endif

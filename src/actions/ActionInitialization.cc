@@ -8,7 +8,8 @@ void ActionInitialization::Build() const
 {
     SetUserAction(new PrimaryGeneratorAction());
 
-    SetUserAction(new RunAction());
+    auto* runAction = new RunAction();
+    SetUserAction(runAction);
 
-    SetUserAction(new EventAction());
+    SetUserAction(new EventAction(runAction));
 }

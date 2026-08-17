@@ -15,11 +15,25 @@ RunAction::RunAction()
     );
 
     analysisManager->CreateNtupleIColumn("eventID");
-    analysisManager->CreateNtupleIColumn("sensorID");
     
-    analysisManager->CreateNtupleDColumn("x_mm");
-    analysisManager->CreateNtupleDColumn("y_mm");
-    analysisManager->CreateNtupleDColumn("energy_eV");
+    analysisManager->CreateNtupleIColumn("primary_pdg_code");
+    
+    analysisManager->CreateNtupleDColumn("primary_momentum_GeV");
+    analysisManager->CreateNtupleDColumn("primary_dir_x");
+    analysisManager->CreateNtupleDColumn("primary_dir_y");
+    analysisManager->CreateNtupleDColumn("primary_dir_z");
+
+    analysisManager->CreateNtupleDColumn("primary_vertex_x_mm");
+    analysisManager->CreateNtupleDColumn("primary_vertex_y_mm");
+    analysisManager->CreateNtupleDColumn("primary_vertex_z_m");
+
+    analysisManager->CreateNtupleIColumn("sensorIDs", fSensorIDs);
+    analysisManager->CreateNtupleDColumn("sensor_pos_x_mm", fSensorPosX);
+    analysisManager->CreateNtupleDColumn("sensor_pos_y_mm", fSensorPosY);
+
+    analysisManager->CreateNtupleDColumn("hit_x_mm", fHitX);
+    analysisManager->CreateNtupleDColumn("hit_y_mm", fHitY);
+    analysisManager->CreateNtupleDColumn("hit_energy_eV", fHitEnergy);
 
     analysisManager->FinishNtuple();
 }

@@ -5,4 +5,9 @@ target_sources(
     PRIVATE
         DetectorConstruction.cc
         PhotonSensitiveDetector.cc
+        CustomDetector.cc
+        World.cc
+        GasDetector.cc
+        MirrorDetector.cc
+        PMTdetector.cc
 )

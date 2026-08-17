@@ -55,9 +55,16 @@ G4bool PhotonSensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory* hi
     hit->SetPosition(preStep->GetPosition());
     hit->SetEnergy(track->GetKineticEnergy());
 
-    const auto sensorID = preStep->GetTouchableHandle()->GetCopyNumber();
+    const auto touchable = preStep->GetTouchableHandle();
+
+    const G4int sensorID = touchable->GetCopyNumber();
+
+    const auto* physical = touchable->GetVolume();
+
+    const G4ThreeVector sensorPosition = physical->GetTranslation();
 
     hit->SetSensorID(sensorID);
+    hit->SetSensorPosition(sensorPosition);
 
     fHitsCollection->insert(hit);
 

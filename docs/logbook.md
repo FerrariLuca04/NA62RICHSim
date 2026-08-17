@@ -512,3 +512,49 @@ Per ora le directory sono tutte definite in un header a parte, in seguito si pu�
 Header: `OutputPaths.hh` `RootFileMerger.hh`
 
 Implementazione: `RootFileMerger.hh` `main.cc`
+
+### 16-08 -- CustomDetector base class
+
+### Obiettivo
+
+Riscrivere la geometria e il metodo `DetectorConstruction::Construct()` usando una base class da cui derivare una classe per ogni componente della geometria.
+
+### Scelta progettuale
+
+Si definisce la classe nel seguente modo
+```c++
+class CustomDetector {
+    public:
+        void Construct(
+            G4LogicalVolume* mother,
+            std::string name
+        );
+    
+        virtual ~CustomDetector() = default;
+
+        G4Material* GetMaterial() const ;
+        G4VSolid* GetSolid() const;
+        G4LogicalVolume* GetLogical() const;
+        std::vector<G4VPhysicalVolume*> GetPhysical() const;
+
+    protected:
+        virtual G4Material* CreateMaterial() = 0;
+        virtual G4VSolid* CreateSolid(std::string name) = 0;
+
+        virtual std::vector<G4VPhysicalVolume*> Place(
+            G4LogicalVolume* mother,
+            G4LogicalVolume* logical,
+            std::string name
+        ) = 0;
+
+    private:
+        std::string fName;
+        G4Material* fMaterial = nullptr;
+        G4VSolid* fSolid = nullptr;
+        G4LogicalVolume* fLogical = nullptr;
+        std::vector<G4VPhysicalVolume*> fPhysical;
+};
+```
+Quindi la base class contiene solo il nome, il materiale, il volume solido, logico e la lista dei volumi fisici derivati dal volume logico. Per costruire la componente si usa il metodo non virtuale `Construct()` che permette di fissare l'ordine degli altri metodi che costruiscono e definiscono le altre proprietá.
+
+Gli altri metodi sono in `protected` perché in questo modo non opssono essere richiamati fuori dalla classe ma possono essere richiamati all'interno dei metodi delle classi derivate.
