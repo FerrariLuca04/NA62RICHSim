@@ -5,12 +5,17 @@
 
 #include "G4VSensitiveDetector.hh"
 
+struct PMTParams;
 class G4Step;
 class G4TouchableHistory;
+class G4PhysicsFreeVector;
 
 class PhotonSensitiveDetector : public G4VSensitiveDetector {
     public:
-        PhotonSensitiveDetector(const G4String& name);
+        PhotonSensitiveDetector(
+            const G4String& name,
+            const PMTParams* pmtParams
+        );
         ~PhotonSensitiveDetector() override = default;
 
         void Initialize(G4HCofThisEvent* hce) override;
@@ -21,6 +26,8 @@ class PhotonSensitiveDetector : public G4VSensitiveDetector {
         PhotonHitsCollection* fHitsCollection = nullptr;
 
         G4int fHitsCollectionID = -1;
+
+        G4PhysicsFreeVector fQuantumEfficiency;
 };
 
 #endif

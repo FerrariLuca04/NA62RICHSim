@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+struct GasParams;
+
 class G4Material;
 class G4VSolid;
 class G4LogicalVolume;
@@ -15,10 +17,7 @@ class G4VPhysicalVolume;
 
 class GasDetector : public CustomDetector {
     public:
-        GasDetector(
-            G4double radius,
-            G4double length
-        );
+        GasDetector(GasParams* gasParams);
 
     protected:
         G4Material* CreateMaterial() override;
@@ -31,8 +30,7 @@ class GasDetector : public CustomDetector {
         ) override;
     
     private:
-        G4double fRadius;
-        G4double fLength;
+        GasParams* fGasParams;
 };
 
 #endif

@@ -1,11 +1,11 @@
 #include "na62rich/detector/DetectorConstruction.hh"
 
 #include "na62rich/detector/PhotonSensitiveDetector.hh"
-
 #include "na62rich/detector/World.hh"
 #include "na62rich/detector/GasDetector.hh"
 #include "na62rich/detector/MirrorDetector.hh"
 #include "na62rich/detector/PMTdetector.hh"
+#include "na62rich/config/DetectorConfig.hh"
 
 #include "G4Tubs.hh"
 #include "G4Box.hh"
@@ -41,16 +41,14 @@ constexpr G4double mirrorPosZ = 20 * m / 2.0;
 constexpr G4double photonSDRadius  = 0.5 * m;
 constexpr G4double PMTradius  = 1.0 * cm;
 constexpr G4double photonSDThick   = 1 * mm;
-constexpr G4double photonSDPosZ = -20.0 * m / 2.0;
+constexpr G4double photonSDPosZ = -17.0 * m / 2.0;
 constexpr G4double photonSDPosR = 0.75 * m;
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {   
     // Build World
     fWorld = new World(
-        worldHeigth,
-        worldHeigth,
-        worldLength
+        worldParams
     );
     fWorld->Construct(
         nullptr,
@@ -59,8 +57,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     
     // Build Gas
     fGas = new GasDetector(
-        gasRadius,
-        gasLength
+        gasParams
     );
     fGas->Construct(
         fWorld->GetLogical(),
@@ -69,11 +66,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     
     // Build Mirror
     fMirror = new MirrorDetector(
-        mirrorCurvatureRadius,
-        mirrorInnerRadius,
-        mirrorApertureRadius,
-        mirrorThickness,
-        mirrorPosZ
+        mirrorParams
     );
     fMirror->Construct(
         fGas->GetLogical(),
@@ -88,11 +81,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
     // Build PMT
     fPMT = new PMTdetector(
-        photonSDRadius,
-        PMTradius,
-        photonSDThick,
-        photonSDPosZ,
-        photonSDPosR
+        pmtParams
     );
     fPMT->Construct(
         fGas->GetLogical(),
@@ -107,7 +96,7 @@ void DetectorConstruction::ConstructSDandField()
 {
     auto* sdManager = G4SDManager::GetSDMpointer();
 
-    auto* photonSD = new PhotonSensitiveDetector("PMTs");
+    auto* photonSD = new PhotonSensitiveDetector("PMTs", pmtParams);
 
     sdManager->AddNewDetector(photonSD);
 

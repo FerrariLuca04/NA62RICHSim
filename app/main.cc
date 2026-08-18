@@ -2,6 +2,7 @@
 #include "na62rich/actions/ActionInitialization.hh"
 #include "na62rich/io/RootFileMerger.hh"
 #include "na62rich/io/OutputPaths.hh"
+#include "na62rich/config/DetectorConfig.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"
@@ -57,6 +58,12 @@ int main(int argc, char** argv)
             << physics->GetPhysicsName()
             << '\n';
     }
+
+    // ---------------------------------------------------------
+    // Detector setting
+    // ---------------------------------------------------------
+
+    FillParams("/home/lucaf/Documenti/CMEPDA/Progetto/NA62RICHSim/config/detector_default.conf");
 
     // ---------------------------------------------------------
     // User interface
