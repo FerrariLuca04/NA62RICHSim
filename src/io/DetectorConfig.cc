@@ -1,4 +1,4 @@
-#include "na62rich/config/DetectorConfig.hh"
+#include "na62rich/io/DetectorConfig.hh"
 
 #include "G4SystemOfUnits.hh"
 
@@ -9,10 +9,10 @@
 #include <string>
 #include <vector>
 
-WorldParams* worldParams = nullptr;
-GasParams* gasParams = nullptr;
-MirrorParams* mirrorParams = nullptr;
-PMTParams* pmtParams = nullptr;
+WorldParams* worldParams;
+GasParams* gasParams;
+MirrorParams* mirrorParams;
+PMTParams* pmtParams;
 
 void FillParams(const std::string& filename)
 {

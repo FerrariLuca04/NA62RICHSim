@@ -1,8 +1,12 @@
 #include "na62rich/detector/DetectorConstruction.hh"
+
 #include "na62rich/actions/ActionInitialization.hh"
+
 #include "na62rich/io/RootFileMerger.hh"
-#include "na62rich/io/OutputPaths.hh"
-#include "na62rich/config/DetectorConfig.hh"
+#include "na62rich/io/Paths.hh"
+
+#include "na62rich/io/DetectorConfig.hh"
+#include "na62rich/io/TestDetectorConfig.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"
@@ -63,7 +67,14 @@ int main(int argc, char** argv)
     // Detector setting
     // ---------------------------------------------------------
 
-    FillParams("/home/lucaf/Documenti/CMEPDA/Progetto/NA62RICHSim/config/detector_default.conf");
+    FillParams(detectorConfigFile.str());
+
+    TestDetectorConfig(
+        *worldParams,
+        *gasParams,
+        *mirrorParams,
+        *pmtParams
+    );
 
     // ---------------------------------------------------------
     // User interface

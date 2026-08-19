@@ -1,6 +1,6 @@
 #include "na62rich/detector/GasDetector.hh"
 
-#include "na62rich/config/DetectorConfig.hh"
+#include "na62rich/io/DetectorConfig.hh"
 
 #include "G4NistManager.hh"
 #include "G4Material.hh"

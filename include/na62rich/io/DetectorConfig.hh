@@ -5,19 +5,24 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
 struct WorldParams
 {
-    G4double length;
-    G4double height;
+    G4double length =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double height =
+        std::numeric_limits<G4double>::quiet_NaN();
 
     std::string material;
 };
 
 struct GasParams
 {
-    G4double length;
-    G4double radius;
+    G4double length =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double radius =
+        std::numeric_limits<G4double>::quiet_NaN();
 
     std::string material;
 
@@ -27,12 +32,17 @@ struct GasParams
 
 struct MirrorParams
 {
-    G4double curvatureRadius;
-    G4double outerRadius;
-    G4double innerRadius;
-    G4double thickness;
+    G4double curvatureRadius =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double outerRadius =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double innerRadius =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double thickness =
+        std::numeric_limits<G4double>::quiet_NaN();
 
-    G4double posZ;
+    G4double posZ =
+        std::numeric_limits<G4double>::quiet_NaN();
 
     std::string material;
 
@@ -42,12 +52,17 @@ struct MirrorParams
 
 struct PMTParams
 {
-    G4double PMTradius;
-    G4double diskRadius;
-    G4double thickness;
+    G4double PMTradius =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double diskRadius =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double thickness =
+        std::numeric_limits<G4double>::quiet_NaN();
 
-    G4double posR;
-    G4double posZ;
+    G4double posR =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double posZ =
+        std::numeric_limits<G4double>::quiet_NaN();
 
     std::string material;
 

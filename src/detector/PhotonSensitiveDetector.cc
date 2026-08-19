@@ -1,6 +1,6 @@
 #include "na62rich/detector/PhotonSensitiveDetector.hh"
 
-#include "na62rich/config/DetectorConfig.hh"
+#include "na62rich/io/DetectorConfig.hh"
 
 #include "G4OpticalPhoton.hh"
 #include "G4PhysicalConstants.hh"

@@ -1,21 +1,14 @@
 #include "na62rich/detector/PMTdetector.hh"
 
-#include "na62rich/config/DetectorConfig.hh"
+#include "na62rich/io/DetectorConfig.hh"
 
 #include "G4NistManager.hh"
 #include "G4Material.hh"
 #include "G4MaterialPropertiesTable.hh"
 
-#include "G4Sphere.hh"
-#include "G4Tubs.hh"
 #include "G4Polyhedra.hh"
-#include "G4IntersectionSolid.hh"
 
 #include "G4PVPlacement.hh"
-#include "G4RotationMatrix.hh"
-
-#include "G4OpticalSurface.hh"
-#include "G4LogicalBorderSurface.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"

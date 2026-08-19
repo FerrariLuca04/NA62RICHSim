@@ -5,44 +5,14 @@
 #include "na62rich/detector/GasDetector.hh"
 #include "na62rich/detector/MirrorDetector.hh"
 #include "na62rich/detector/PMTdetector.hh"
-#include "na62rich/config/DetectorConfig.hh"
+#include "na62rich/io/DetectorConfig.hh"
 
-#include "G4Tubs.hh"
-#include "G4Box.hh"
-#include "G4Sphere.hh"
-#include "G4IntersectionSolid.hh"
-#include "G4RotationMatrix.hh"
-
-#include "G4LogicalVolume.hh"
-#include "G4NistManager.hh"
-#include "G4PVPlacement.hh"
-#include "G4OpticalSurface.hh"
-#include "G4LogicalBorderSurface.hh"
-#include "G4MaterialPropertiesTable.hh"
+#include "G4VPhysicalVolume.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
 
 #include "G4SDManager.hh"
-
-// World dimensions
-constexpr G4double worldHeigth = 10.0 * m;
-constexpr G4double worldLength = 30.0 * m;
-// Gas dimensions
-constexpr G4double gasRadius = 1.5 * m;
-constexpr G4double gasLength = 20.0 * m;
-// Mirror dimensions
-constexpr G4double mirrorCurvatureRadius = 40.0 * m;
-constexpr G4double mirrorThickness       = 2.5 * cm;
-constexpr G4double mirrorApertureRadius  = 1.5 * m;
-constexpr G4double mirrorInnerRadius     = 10.0 * cm;
-constexpr G4double mirrorPosZ = 20 * m / 2.0;
-// PMTs dimensions
-constexpr G4double photonSDRadius  = 0.5 * m;
-constexpr G4double PMTradius  = 1.0 * cm;
-constexpr G4double photonSDThick   = 1 * mm;
-constexpr G4double photonSDPosZ = -17.0 * m / 2.0;
-constexpr G4double photonSDPosR = 0.75 * m;
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {   
