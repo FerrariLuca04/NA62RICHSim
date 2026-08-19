@@ -1,6 +1,6 @@
 #include "na62rich/detector/GasDetector.hh"
 
-#include "na62rich/detector/GasDetector.hh"
+#include "na62rich/io/DetectorConfig.hh"
 
 #include "G4NistManager.hh"
 #include "G4Material.hh"
@@ -12,29 +12,20 @@
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
 
-GasDetector::GasDetector(G4double radius, G4double length) : fRadius(radius), fLength(length)
+GasDetector::GasDetector(GasParams* gasParams) : fGasParams(gasParams)
 {}
 
 G4Material* GasDetector::CreateMaterial()
 {
     auto* nist = G4NistManager::Instance();
-    auto* gasMaterial = nist->FindOrBuildMaterial("G4_Ne");
-
-    std::vector<G4double> photonEnergy = {
-        1.5 * eV,
-        10.0 * eV
-    };
-    std::vector<G4double> refractiveIndexGas = {
-        1.000067,
-        1.000067
-    };
+    auto* gasMaterial = nist->FindOrBuildMaterial(fGasParams->material);
 
     auto* gasMPT = new G4MaterialPropertiesTable();
 
     gasMPT->AddProperty(
         "RINDEX",
-        photonEnergy,
-        refractiveIndexGas
+        fGasParams->photonEnergies,
+        fGasParams->refractiveIndex
     );
 
     gasMaterial->SetMaterialPropertiesTable(gasMPT);
@@ -48,8 +39,8 @@ G4VSolid* GasDetector::CreateSolid(std::string name)
         new G4Tubs(
             name,
             0.0,
-            fRadius,
-            fLength / 2.0,
+            fGasParams->radius,
+            fGasParams->length / 2.0,
             0.0,
             twopi
         );

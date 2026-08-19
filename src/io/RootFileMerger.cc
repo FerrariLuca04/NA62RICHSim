@@ -1,6 +1,6 @@
 #include "na62rich/io/RootFileMerger.hh"
 
-#include "na62rich/io/OutputPaths.hh"
+#include "na62rich/io/Paths.hh"
 
 #include "TFileMerger.h"
 

@@ -8,17 +8,12 @@
 #include <string>
 #include <vector>
 
+struct PMTParams;
 class G4OpticalSurface;
 
 class PMTdetector : public CustomDetector {
     public:
-        PMTdetector(
-            G4double diskRadius,
-            G4double PMTradius,
-            G4double thickness, 
-            G4double posZ,
-            G4double posR
-        );
+        PMTdetector(PMTParams* pmtParams);
 
     protected:
         G4Material* CreateMaterial() override;
@@ -31,12 +26,7 @@ class PMTdetector : public CustomDetector {
         ) override;
     
     private:
-        G4double fDiskRadius;
-        G4double fPMTradius;
-        G4double fThickness;
-
-        G4double fPosZ;
-        G4double fPosR;
+        PMTParams* fPMTParams;
 };
 
 bool IsHexagonInsideCircle(

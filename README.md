@@ -51,7 +51,25 @@ cmake -S . -B build
 cmake --build build -j
 ```
 
-### Run
+### Rebuilding the project
+
+After modifying the source code, you usually only need to run:
+
+```bash
+cmake --build build -j
+```
+
+CMake will automatically recompile only the files affected by the changes.
+
+To perform a clean build, remove the entire `build/` directory, configure the project again, and rebuild it:
+
+```bash
+rm -rf build
+cmake -S . -B build
+cmake --build build -j
+```
+
+## Run
 
 The executable will be generated at:
 
@@ -68,36 +86,68 @@ To start the simulation using the Geant4 interactive UI, run:
 Alternatively, the simulation can be executed in batch mode using a Geant4 macro:
 
 ```bash
-./build/bin/na62_rich_sim path/to/macro.mac
+./build/bin/na62_rich_sim macro.mac
 ```
 
-> The `macros/` directory contains some preconfigured macros that can be used as examples or starting points.
-
-### Rebuilding the project
-
-After modifying the source code, you usually only need to run:
+or:
 
 ```bash
-cmake --build build -j
+./build/bin/na62_rich_sim --macro macro.mac
 ```
 
-CMake will automatically recompile only the files affected by the changes.
+> Macro files (`.mac`) must be located in the `macros/` directory.
 
-To perform a clean build, remove the entire `build` directory, configure the project again, and rebuild it:
-
-```bash
-rm -rf build
-cmake -S . -B build
-cmake --build build -j
-```
 
 ## Output file
 
-In `include/na62rich/io/OutputPaths.hh` is selected `output/` as default directory for output files.
+The default output directory is defined as `output/` in `include/na62rich/io/Paths.hh`.
 
-During the execution of the program, will be created `output/tmp/` for temporary files, removed at the end of the program.
+During program execution, the `output/tmp/` directory is created for temporary files and removed when the program terminates.
 
-The default output file is `output/data_na62rich_sim.root` and contain a `TTree` named `PhotonHits`.
+The default output file is:
 
-### TTree structure
+```text
+output/data_na62rich_sim.root
+```
 
+A different output file name can be specified using the `--output` argument:
+
+```bash
+./build/bin/na62_rich_sim --output name_file.root
+```
+
+Alternatively, a `.root` file name can be passed directly as a command-line argument:
+
+```bash
+./build/bin/na62_rich_sim name_file.root
+```
+
+The file contains a `TTree` named `PhotonHits`, with one entry for each simulated event. Each entry stores the primary-particle properties and the optical-photon hits detected during the event.
+
+For the complete output data structure, see [Output format](docs/output.md).
+
+## Detector configuration
+
+The default detector configuration is stored in:
+
+```text
+config/detector_default.conf
+```
+
+This file contains the geometrical and material parameters used to construct the detector.
+
+You can modify the configuration file and run the program again without recompiling it. This allows you to change the detector geometry and materials independently of the source code.
+
+You can also create a custom `.conf` file and select it using the `--config-detector` argument:
+
+```bash
+./build/bin/na62_rich_sim --config-detector name_file.conf
+```
+
+Alternatively, a `.conf` file can be passed directly as a command-line argument:
+
+```bash
+./build/bin/na62_rich_sim name_file.conf
+```
+
+> Config files (`.conf`) must be located in the `config/` directory.

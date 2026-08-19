@@ -8,17 +8,12 @@
 #include <string>
 #include <vector>
 
+struct MirrorParams;
 class G4OpticalSurface;
 
 class MirrorDetector : public CustomDetector {
     public:
-        MirrorDetector(
-            G4double curvatureRadius,
-            G4double innerRadius,
-            G4double outerRadius,
-            G4double thickness, 
-            G4double posZ
-        );
+        MirrorDetector(MirrorParams* mirrorParams);
 
         void SetSurface(
             G4VPhysicalVolume* physical1,
@@ -36,14 +31,7 @@ class MirrorDetector : public CustomDetector {
         ) override;
     
     private:
-        G4double fCurvatureRadius;
-        G4double fInnerRadius;
-        G4double fOuterRadius;
-        G4double fThickness;
-
-        G4double fThetaMax;
-
-        G4double fPosZ;
+        MirrorParams* fMirrorParams;
 
         G4OpticalSurface* fSurface = nullptr;
 };

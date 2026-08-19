@@ -1,35 +1,27 @@
 #include "na62rich/detector/PMTdetector.hh"
 
+#include "na62rich/io/DetectorConfig.hh"
+
 #include "G4NistManager.hh"
 #include "G4Material.hh"
 #include "G4MaterialPropertiesTable.hh"
 
-#include "G4Sphere.hh"
-#include "G4Tubs.hh"
 #include "G4Polyhedra.hh"
-#include "G4IntersectionSolid.hh"
 
 #include "G4PVPlacement.hh"
-#include "G4RotationMatrix.hh"
-
-#include "G4OpticalSurface.hh"
-#include "G4LogicalBorderSurface.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
 
 #include <vector>
 
-PMTdetector::PMTdetector(G4double diskRadius, G4double PMTradius, G4double thickness, G4double posZ, G4double posR)
-    : fDiskRadius(diskRadius), fPMTradius(PMTradius), fThickness(thickness), fPosR(posR)
-{
-    fPosZ = posZ + thickness / 2.0;
-}
+PMTdetector::PMTdetector(PMTParams* pmtParams) : fPMTParams(pmtParams)
+{}
 
 G4Material* PMTdetector::CreateMaterial()
 {
     auto* nist = G4NistManager::Instance();
-    auto* PMTmaterial = nist->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+    auto* PMTmaterial = nist->FindOrBuildMaterial(fPMTParams->material);
 
     std::vector<G4double> photonEnergy = {
         1.5 * eV,
@@ -60,14 +52,14 @@ G4VSolid* PMTdetector::CreateSolid(std::string name)
     constexpr G4int nZPlanes = 2; 
     
     G4double zPlane[nZPlanes] = {
-        -fThickness / 2.0,
-        +fThickness / 2.0
+        -fPMTParams->thickness / 2.0,
+        +fPMTParams->thickness / 2.0
     };
     G4double rInner[nZPlanes] = {
         0.0, 0.0
     };
     G4double rOuter[nZPlanes] = {
-        fPMTradius, fPMTradius
+        fPMTParams->PMTradius, fPMTParams->PMTradius
     };
 
     auto* hexagonalPrism = new G4Polyhedra(
@@ -89,7 +81,7 @@ std::vector<G4VPhysicalVolume*> PMTdetector::Place(G4LogicalVolume* mother, G4Lo
     std::vector<G4VPhysicalVolume*> physicalList;
     
     const G4double circumRadius =
-        fPMTradius / std::cos(pi / 6.0);
+        fPMTParams->PMTradius / std::cos(pi / 6.0);
 
     const G4double dx =
         1.5 * circumRadius;
@@ -100,7 +92,7 @@ std::vector<G4VPhysicalVolume*> PMTdetector::Place(G4LogicalVolume* mother, G4Lo
     const G4int n =
         static_cast<G4int>(
             std::ceil(
-                fDiskRadius / fPMTradius
+                fPMTParams->diskRadius / fPMTParams->PMTradius
             )
         ) + 2;
 
@@ -116,16 +108,16 @@ std::vector<G4VPhysicalVolume*> PMTdetector::Place(G4LogicalVolume* mother, G4Lo
 
                 const G4double y = dy * (r + 0.5 * q);
 
-                if (!IsHexagonInsideCircle(x, y, fPMTradius, fDiskRadius)) {
+                if (!IsHexagonInsideCircle(x, y, fPMTParams->PMTradius, fPMTParams->diskRadius)) {
                     continue;
                 }
 
                 auto* physical = new G4PVPlacement(
                     nullptr,
                     G4ThreeVector(
-                        (i * 2.0 - 1) * fPosR + x,
+                        (i * 2.0 - 1) * fPMTParams->posR + x,
                         y,
-                        fPosZ
+                        fPMTParams->posZ
                     ),
                     logical,
                     name,

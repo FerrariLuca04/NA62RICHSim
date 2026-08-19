@@ -1,6 +1,6 @@
 #include "na62rich/actions/RunAction.hh"
 
-#include "na62rich/io/OutputPaths.hh"
+#include "na62rich/io/Paths.hh"
 
 #include "G4AnalysisManager.hh"
 #include "G4Run.hh"

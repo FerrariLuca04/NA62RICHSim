@@ -8,13 +8,11 @@
 #include <string>
 #include <vector>
 
+struct WorldParams;
+
 class World : public CustomDetector {
     public:
-        World(
-            G4double dimX,
-            G4double dimY,
-            G4double dimZ
-        );
+        World(WorldParams* worldParams);
 
     protected:
         G4Material* CreateMaterial() override;
@@ -27,9 +25,7 @@ class World : public CustomDetector {
         ) override;
     
     private:
-        G4double fDimX;
-        G4double fDimY;
-        G4double fDimZ;
+        WorldParams* fWorldParams;
 };
 
 #endif

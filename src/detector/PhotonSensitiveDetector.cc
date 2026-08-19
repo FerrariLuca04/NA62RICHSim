@@ -1,5 +1,7 @@
 #include "na62rich/detector/PhotonSensitiveDetector.hh"
 
+#include "na62rich/io/DetectorConfig.hh"
+
 #include "G4OpticalPhoton.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4Step.hh"
@@ -7,9 +9,21 @@
 #include "G4SystemOfUnits.hh"
 #include "G4Track.hh"
 
+#include "G4PhysicsFreeVector.hh"
+
 #include "G4SDManager.hh"
 
-PhotonSensitiveDetector::PhotonSensitiveDetector(const G4String& name) : G4VSensitiveDetector(name)
+#include "Randomize.hh"
+
+PhotonSensitiveDetector::PhotonSensitiveDetector(
+    const G4String& name,
+    const PMTParams* pmtParams
+)
+    : G4VSensitiveDetector(name),
+      fQuantumEfficiency(
+          pmtParams->photonEnergies,
+          pmtParams->quantumEfficiency
+      )
 {
     collectionName.insert("PhotonHitsCollection");
 }
@@ -50,10 +64,20 @@ G4bool PhotonSensitiveDetector::ProcessHits(G4Step* step, G4TouchableHistory* hi
         return false;
     }
 
+    const auto energy = track->GetKineticEnergy();
+
+    const G4double qe = fQuantumEfficiency.Value(energy);
+
+    if (G4UniformRand() >= qe)
+    {
+        track->SetTrackStatus(fStopAndKill);
+        return false;
+    }
+
     auto* hit = new PhotonHit;
 
+    hit->SetEnergy(energy);
     hit->SetPosition(preStep->GetPosition());
-    hit->SetEnergy(track->GetKineticEnergy());
 
     const auto touchable = preStep->GetTouchableHandle();
 

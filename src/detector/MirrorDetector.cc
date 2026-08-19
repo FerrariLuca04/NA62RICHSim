@@ -1,5 +1,7 @@
 #include "na62rich/detector/MirrorDetector.hh"
 
+#include "na62rich/io/DetectorConfig.hh"
+
 #include "G4NistManager.hh"
 #include "G4Material.hh"
 #include "G4MaterialPropertiesTable.hh"
@@ -19,13 +21,8 @@
 
 #include <vector>
 
-MirrorDetector::MirrorDetector(G4double curvatureRadius, G4double innerRadius, G4double outerRadius, G4double thickness, G4double posZ)
-    : fCurvatureRadius(curvatureRadius), fInnerRadius(innerRadius), fOuterRadius(outerRadius), fThickness(thickness)
-{
-    fThetaMax = std::asin(3.0 * fOuterRadius / fCurvatureRadius);
-    
-    fPosZ = posZ - thickness;
-}
+MirrorDetector::MirrorDetector(MirrorParams* mirrorParams) : fMirrorParams(mirrorParams)
+{}
 
 void MirrorDetector::SetSurface(G4VPhysicalVolume* physical1, G4VPhysicalVolume* physical2)
 {
@@ -42,16 +39,7 @@ void MirrorDetector::SetSurface(G4VPhysicalVolume* physical1, G4VPhysicalVolume*
 G4Material* MirrorDetector::CreateMaterial()
 {
     auto* nist = G4NistManager::Instance();
-    auto* mirrorMaterial = nist->FindOrBuildMaterial("G4_GLASS_PLATE");
-
-    std::vector<G4double> photonEnergy = {
-        1.5 * eV,
-        10.0 * eV
-    };
-    std::vector<G4double> reflectivityMirror = {
-        1.0,
-        1.0
-    };
+    auto* mirrorMaterial = nist->FindOrBuildMaterial(fMirrorParams->material);
     
     fSurface = new G4OpticalSurface("MirrorSurface");
 
@@ -64,8 +52,8 @@ G4Material* MirrorDetector::CreateMaterial()
 
     mirrorMPT->AddProperty(
         "REFLECTIVITY",
-        photonEnergy,
-        reflectivityMirror
+        fMirrorParams->photonEnergies,
+        fMirrorParams->reflectivity
     );
 
     fSurface->SetMaterialPropertiesTable(mirrorMPT);
@@ -75,21 +63,23 @@ G4Material* MirrorDetector::CreateMaterial()
 
 G4VSolid* MirrorDetector::CreateSolid(std::string name)
 {
+    G4double thetaMax = std::asin(3.0 * fMirrorParams->outerRadius / fMirrorParams->curvatureRadius);
+
     auto* sphericalShell =
         new G4Sphere(
             "Spherical Shell",
-            fCurvatureRadius - fThickness,
-            fCurvatureRadius,
+            fMirrorParams->curvatureRadius - fMirrorParams->thickness,
+            fMirrorParams->curvatureRadius,
             0.0,
             twopi,
             0.0,
-            fThetaMax
+            thetaMax
         );
     auto* cutter =
         new G4Tubs(
             "Cutter",
-            fInnerRadius,
-            fOuterRadius,
+            fMirrorParams->innerRadius,
+            fMirrorParams->outerRadius,
             1.0 * m,
             0.0,
             pi
@@ -99,7 +89,7 @@ G4VSolid* MirrorDetector::CreateSolid(std::string name)
         sphericalShell,
         cutter,
         nullptr,
-        G4ThreeVector(0.0, fOuterRadius / -2.0, fCurvatureRadius)
+        G4ThreeVector(0.0, fMirrorParams->outerRadius / -2.0, fMirrorParams->curvatureRadius)
     );
 
     return mirrorSolid;
@@ -108,7 +98,7 @@ G4VSolid* MirrorDetector::CreateSolid(std::string name)
 std::vector<G4VPhysicalVolume*> MirrorDetector::Place(G4LogicalVolume* mother, G4LogicalVolume* logical, std::string name)
 {
     std::vector<G4VPhysicalVolume*> physicalList;
-    const G4double mirrorCenterZ = fPosZ - fCurvatureRadius;
+    const G4double mirrorCenterZ = fMirrorParams->posZ - fMirrorParams->curvatureRadius;
     
     for (int i = 0; i < 2; ++i) {
         auto* rotation = new G4RotationMatrix();
@@ -117,7 +107,7 @@ std::vector<G4VPhysicalVolume*> MirrorDetector::Place(G4LogicalVolume* mother, G
         auto* physical =
             new G4PVPlacement(
                 rotation,
-                G4ThreeVector(((i * 2) - 1) * fOuterRadius / 2.0, 0.0, mirrorCenterZ),
+                G4ThreeVector(((i * 2) - 1) * fMirrorParams->outerRadius / 2.0, 0.0, mirrorCenterZ),
                 logical,
                 name,
                 mother,

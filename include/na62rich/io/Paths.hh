@@ -1,5 +1,5 @@
-#ifndef OUTPUT_PATHS_HH
-#define OUTPUT_PATHS_HH
+#ifndef PATHS_HH
+#define PATHS_HH
 
 #include <filesystem>
 
@@ -9,10 +9,16 @@ inline const std::filesystem::path outputDirectory =
 inline const std::filesystem::path tmpDirectory =
     outputDirectory / "tmp";
 
-inline const std::filesystem::path outputFile =
+inline std::filesystem::path outputFile =
     outputDirectory / "data_na62rich_sim.root";
 
 inline const std::string tmpFileName =
     "photon_hits";
+
+inline const std::filesystem::path configDirectory =
+    "config";
+
+inline std::filesystem::path detectorConfigFile =
+    configDirectory / "detector_default.conf";
 
 #endif

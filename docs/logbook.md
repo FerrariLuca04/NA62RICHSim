@@ -557,4 +557,54 @@ class CustomDetector {
 ```
 Quindi la base class contiene solo il nome, il materiale, il volume solido, logico e la lista dei volumi fisici derivati dal volume logico. Per costruire la componente si usa il metodo non virtuale `Construct()` che permette di fissare l'ordine degli altri metodi che costruiscono e definiscono le altre proprietá.
 
-Gli altri metodi sono in `protected` perché in questo modo non opssono essere richiamati fuori dalla classe ma possono essere richiamati all'interno dei metodi delle classi derivate.
+Gli altri metodi sono in `protected` perché in questo modo non possono essere richiamati fuori dalla classe ma possono essere richiamati all'interno dei metodi delle classi derivate.
+
+### Codice
+
+Header: `CustomDetector.hh` `World.hh` `GasDetector.hh` `MirrorDetector.hh` `PMTdetector.hh`
+
+Implementazione: `CustomDetector.cc` `World.cc` `GasDetector.cc` `MirrorDetector.cc` `PMTdetector.cc` `DetectorConstruction.cc`
+
+## 18-08 -- New configuration system for DetectorConstruction
+
+### Obiettivo
+
+Permettere di configurare le dimensioni, i materiali e le proprieta ottiche dei vari componenti del detector senza ricompilare il programma ma attraverso un file di configurazione.
+
+### Scelta progettuale
+
+Si sono definite delle `struct` per ogni componente che contiene tutte le informazioni necessarie per descriverli e costruirli. Come input si scrive un file di testo `config/detectr_default.conf` e tramite la lettura dei vari valori scritti all'interno si vanno a riempire le `struct`.
+
+Inanzitutto si vanno a definire le seguenti funzioni ausiliarie
+```c++
+std::string Trim(const std::string& str);
+G4double GetLengthUnit(const std::string& unit);
+G4double GetEnergyUnit(const std::string& unit);
+```
+che servono per eliminare tutti gli spazi superflui e per convertire la stringa che indica le unitá di misura delle varie quantitá in una unitá di Geant4.
+
+Si ha anche
+```c++
+std::vector<G4double> ParseEnergyVector(
+    const std::string& text,
+    std::size_t lineNumber
+);
+std::vector<G4double> ParseDimensionlessVector(
+    const std::string& text,
+    std::size_t lineNumber
+);
+G4double ParseLength(
+    const std::string& text,
+    std::size_t lineNumber
+);
+```
+per parsare i vettori di energie e i vettori adimensionali: dato una stringa che rappresenta una lista viene trasformata in un vettore di `G4double`; invece `ParseLenagth()` restituisce un `G4double` unico dato la stringa che lo contiene.
+
+Il parsing del file vero e proprio è eseguito da `FillParams`, che allo stesso tempo riempie le `struct`. Per farlo cicla su tutte le righe del file, dovo aver usato `Trim()` e dopo aver usato gli `=` per dividere la `key` da `value`, esegueuna serie di `ìf`:
+```c++
+// esempio...
+else if (key == "worldLength") {
+    worldParams->length =
+        ParseLength(value, lineNumber);
+}
+```
