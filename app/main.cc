@@ -21,6 +21,49 @@
 
 int main(int argc, char** argv)
 {   
+    std::string macro = "";
+    std::string output = "";
+    std::string config = "";
+
+    if (argc > 1) {
+        for (int a = 0; a < argc; ++a){
+            std::string arg = argv[a];
+
+            // Select macro
+            if (arg == "--macro") {
+                macro = argv[a + 1];
+                a += 1; //Skip the value
+            }
+            else if (arg.ends_with(".mac")) {
+                macro = arg;
+            }
+            // Select output name
+            else if (arg == "--output") {
+                output = argv[a + 1];
+                a += 1; //Skip the value
+            }
+            else if (arg.ends_with(".root")) {
+                output = arg;
+            }
+            // Select config
+            else if (arg == "--macro") {
+                config = argv[a + 1];
+                a += 1; //Skip the value
+            }
+            else if (arg.ends_with(".conf")) {
+                config = arg;
+            }
+        }
+    }
+
+    //Change directories
+    if (config != "") {
+        detectorConfigFile = configDirectory / config;
+    }
+    if (output != "") {
+        outputFile = outputDirectory / output;
+    }
+
     // ---------------------------------------------------------
     // Output setting
     // ---------------------------------------------------------
@@ -38,6 +81,19 @@ int main(int argc, char** argv)
     }
 
     std::filesystem::create_directories(tmpDirectory);
+
+    // ---------------------------------------------------------
+    // Detector setting
+    // ---------------------------------------------------------
+
+    FillParams(detectorConfigFile.string());
+
+    TestDetectorConfig(
+        *worldParams,
+        *gasParams,
+        *mirrorParams,
+        *pmtParams
+    );
 
     // ---------------------------------------------------------
     // Physics list
@@ -64,25 +120,12 @@ int main(int argc, char** argv)
     }
 
     // ---------------------------------------------------------
-    // Detector setting
-    // ---------------------------------------------------------
-
-    FillParams(detectorConfigFile.str());
-
-    TestDetectorConfig(
-        *worldParams,
-        *gasParams,
-        *mirrorParams,
-        *pmtParams
-    );
-
-    // ---------------------------------------------------------
     // User interface
     // ---------------------------------------------------------
 
     G4UIExecutive* ui = nullptr;
 
-    if (argc == 1) {
+    if (macro == "") {
         ui = new G4UIExecutive(argc, argv);
     }
 
@@ -141,7 +184,7 @@ int main(int argc, char** argv)
     } else {
 
         std::cout<<
-            "Running '" <<argv[1]<< "' macro."
+            "Running '" <<macro<< "' macro."
         <<std::endl;
 
         G4String command = "/control/execute ";
