@@ -26,6 +26,7 @@ Each entry stores:
 
 | Branch                 | Type                  |  Unit | Description                                                  |
 | :--------------------- | :-------------------- | :---: | :----------------------------------------------------------- |
+| `runID`                | `Int_t`               |   —   | Identifier of the run                                        |
 | `eventID`              | `Int_t`               |   —   | Identifier of the simulated event                            |
 | `primary_pdg_code`     | `Int_t`               |   —   | PDG code of the primary particle                             |
 | `primary_momentum_GeV` | `Double_t`            | GeV/c | Magnitude of the primary-particle momentum                   |
