@@ -8,6 +8,7 @@ struct PMTParams;
 
 struct EntranceParams;
 struct DecayRegionParams;
+struct ParticleParams;
 
 // Test function for config parameters
 void TestDetectorConfig(
@@ -19,7 +20,8 @@ void TestDetectorConfig(
 
 void TestPrimaryGeneratorConfig(
     const EntranceParams& entrance,
-    const DecayRegionParams& decayRegion
+    const DecayRegionParams& decayRegion,
+    const ParticleParams& particle
 );
 
 #endif

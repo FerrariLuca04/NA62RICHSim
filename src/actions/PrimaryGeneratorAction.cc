@@ -23,7 +23,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction()
     auto* pion = particleTable->FindParticle("pi+");
 
     particleGun_->SetParticleDefinition(pion);
-    particleGun_->SetParticleMomentum(20.0 * GeV);
 }
 
 
@@ -34,7 +33,8 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
-{
+{   
+    // Entrance point
     const G4double uR = G4UniformRand();
     const G4double r =
         std::sqrt(
@@ -62,6 +62,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
         entrancePoint
     );
 
+
+    // Virtual decay vertex
     const G4double uL = G4UniformRand();
     const G4double zVirtualVertex = (uL * decayRegionParams->length) - decayRegionParams->start;
     const G4ThreeVector virtualVertex(
@@ -73,6 +75,12 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
     particleGun_->SetParticleMomentumDirection(
         entrancePoint - virtualVertex
     );
+
+
+    // Particle Energy
+    const G4double uE = G4UniformRand();
+    const G4double Energy = particleParams->EMin + uE * (particleParams->EMax - particleParams->EMin);
+    particleGun_->SetParticleMomentum(Energy);
 
     particleGun_->GeneratePrimaryVertex(event);
 }

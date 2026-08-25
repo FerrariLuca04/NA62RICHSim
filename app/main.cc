@@ -105,7 +105,8 @@ int main(int argc, char** argv)
 
     TestPrimaryGeneratorConfig(
         *entranceParams,
-        *decayRegionParams
+        *decayRegionParams,
+        *particleParams
     );
 
     // ---------------------------------------------------------

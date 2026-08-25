@@ -644,7 +644,8 @@ void TestDetectorConfig(
 
 void TestPrimaryGeneratorConfig(
     const EntranceParams& entrance,
-    const DecayRegionParams& decayRegion
+    const DecayRegionParams& decayRegion,
+    const ParticleParams& particle
 )
 {
     std::vector<std::string> errors;
@@ -743,6 +744,18 @@ void TestPrimaryGeneratorConfig(
         errors
     );
 
+    CheckNonNegative(
+        particle.EMin,
+        "particleParams.EMin",
+        errors
+    );
+
+    CheckPositive(
+        particle.EMax,
+        "particleParams.EMax",
+        errors
+    );
+
 
     // ---------------------------------------------------------
     // Entrance geometrical constraints
@@ -777,7 +790,7 @@ void TestPrimaryGeneratorConfig(
     if (
         std::isfinite(entrance.phiMin)
         && std::isfinite(entrance.phiMax)
-        && (entrance.phiMin >= 360 * deg || entrance.phiMax >= 360 * deg)
+        && (entrance.phiMin >= 360 * deg || entrance.phiMax > 360 * deg)
     ) {
         AddError(
             errors,
@@ -802,6 +815,24 @@ void TestPrimaryGeneratorConfig(
             "than decay region length."
         );
     }
+
+
+    // ---------------------------------------------------------
+    // Energies constraint
+    // ---------------------------------------------------------
+
+    if (
+        std::isfinite(particle.EMin)
+        && std::isfinite(particle.EMax)
+        && particle.EMin >= particle.EMax
+    ) {
+        AddError(
+            errors,
+            "Minimum energy must be smaller "
+            "than maximum energy."
+        );
+    }
+
 
     // ---------------------------------------------------------
     // Final result

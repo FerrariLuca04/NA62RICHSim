@@ -149,6 +149,28 @@ std::vector<G4double> ParseDimensionlessVector(
 }
 
 
+G4double ParseEnergy(
+    const std::string& text,
+    std::size_t lineNumber
+)
+{
+    std::istringstream stream(text);
+
+    G4double value;
+    std::string unit;
+
+    if (!(stream >> value >> unit)) {
+        throw std::runtime_error(
+            "Invalid energy at line "
+            + std::to_string(lineNumber)
+            + ": " + text
+        );
+    }
+
+    return value * GetEnergyUnit(unit);
+}
+
+
 G4double ParseLength(
     const std::string& text,
     std::size_t lineNumber

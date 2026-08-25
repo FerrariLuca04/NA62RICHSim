@@ -24,6 +24,11 @@ std::vector<G4double> ParseDimensionlessVector(
     std::size_t lineNumber
 );
 
+G4double ParseEnergy(
+    const std::string& text,
+    std::size_t lineNumber
+);
+
 G4double ParseLength(
     const std::string& text,
     std::size_t lineNumber

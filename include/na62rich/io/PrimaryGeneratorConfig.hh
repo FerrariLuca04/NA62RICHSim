@@ -5,24 +5,41 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
 struct EntranceParams {
-    G4double rMin;
-    G4double rMax;
-    G4double phiMin;
-    G4double phiMax;
+    G4double rMin =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double rMax =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double phiMin =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double phiMax =
+        std::numeric_limits<G4double>::quiet_NaN();
 };
 
 struct DecayRegionParams {
-    G4double start;
-    G4double length;
-    G4double sigmaX;
-    G4double sigmaY;
+    G4double start =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double length =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double sigmaX =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double sigmaY =
+        std::numeric_limits<G4double>::quiet_NaN();
+};
+
+struct ParticleParams {
+    G4double EMin =
+        std::numeric_limits<G4double>::quiet_NaN();
+    G4double EMax =
+        std::numeric_limits<G4double>::quiet_NaN();
 };
 
 void SetGeneratorParams(const std::string& filename);
 
 extern EntranceParams* entranceParams;
 extern DecayRegionParams* decayRegionParams;
+extern ParticleParams* particleParams;
 
 #endif

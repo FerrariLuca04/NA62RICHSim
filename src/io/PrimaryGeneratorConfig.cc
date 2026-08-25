@@ -13,6 +13,7 @@
 
 EntranceParams* entranceParams;
 DecayRegionParams* decayRegionParams;
+ParticleParams* particleParams;
 
 void SetGeneratorParams(const std::string& filename)
 {
@@ -30,6 +31,10 @@ void SetGeneratorParams(const std::string& filename)
 
     if (decayRegionParams == nullptr) {
         decayRegionParams = new DecayRegionParams{};
+    }
+
+    if (particleParams == nullptr) {
+        particleParams = new ParticleParams{};
     }
 
 
@@ -105,6 +110,15 @@ void SetGeneratorParams(const std::string& filename)
         else if (key == "decay_region_sigma_y") {
             decayRegionParams->sigmaY =
                 ParseLength(value, lineNumber);
+        }
+        //Particle
+        else if (key == "particle_energy_min") {
+            particleParams->EMin =
+                ParseEnergy(value, lineNumber);
+        }
+        else if (key == "particle_energy_max") {
+            particleParams->EMax =
+                ParseEnergy(value, lineNumber);
         }
     }
 }
