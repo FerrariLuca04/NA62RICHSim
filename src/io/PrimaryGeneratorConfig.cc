@@ -112,13 +112,16 @@ void SetGeneratorParams(const std::string& filename)
                 ParseLength(value, lineNumber);
         }
         //Particle
-        else if (key == "particle_energy_min") {
-            particleParams->EMin =
+        else if (key == "particle_momentum_min") {
+            particleParams->pMin =
                 ParseEnergy(value, lineNumber);
         }
-        else if (key == "particle_energy_max") {
-            particleParams->EMax =
+        else if (key == "particle_momentum_max") {
+            particleParams->pMax =
                 ParseEnergy(value, lineNumber);
+        }
+        else if (key == "particle_type") {
+            particleParams->type = value;
         }
     }
 }

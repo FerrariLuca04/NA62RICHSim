@@ -6,9 +6,8 @@
 #include "na62rich/io/Paths.hh"
 
 #include "na62rich/io/DetectorConfig.hh"
-#include "na62rich/io/TestDetectorConfig.hh"
-
 #include "na62rich/io/PrimaryGeneratorConfig.hh"
+#include "na62rich/io/TestConfig.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"

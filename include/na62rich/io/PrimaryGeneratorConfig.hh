@@ -30,10 +30,11 @@ struct DecayRegionParams {
 };
 
 struct ParticleParams {
-    G4double EMin =
+    G4double pMin =
         std::numeric_limits<G4double>::quiet_NaN();
-    G4double EMax =
+    G4double pMax =
         std::numeric_limits<G4double>::quiet_NaN();
+    std::string type;
 };
 
 void SetGeneratorParams(const std::string& filename);

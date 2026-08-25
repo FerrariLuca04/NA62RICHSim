@@ -1,5 +1,5 @@
-#ifndef NA62RICH_TEST_DETECTOR_CONFIG_HH
-#define NA62RICH_TEST_DETECTOR_CONFIG_HH
+#ifndef NA62RICH_TEST_CONFIG_HH
+#define NA62RICH_TEST_CONFIG_HH
 
 struct WorldParams;
 struct GasParams;

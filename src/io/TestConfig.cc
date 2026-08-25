@@ -1,9 +1,11 @@
-#include "na62rich/io/TestDetectorConfig.hh"
+#include "na62rich/io/TestConfig.hh"
 
 #include "na62rich/io/DetectorConfig.hh"
 #include "na62rich/io/PrimaryGeneratorConfig.hh"
 
 #include "G4SystemOfUnits.hh"
+#include "G4ParticleTable.hh"
+#include "G4ParticleDefinition.hh"
 
 #include <cmath>
 #include <sstream>
@@ -703,6 +705,12 @@ void TestPrimaryGeneratorConfig(
         errors
     );
 
+    CheckStringNotEmpty(
+        particle.type,
+        "particle.type",
+        errors
+    );
+
 
     // ---------------------------------------------------------
     // Basic validity
@@ -745,13 +753,13 @@ void TestPrimaryGeneratorConfig(
     );
 
     CheckNonNegative(
-        particle.EMin,
+        particle.pMin,
         "particleParams.EMin",
         errors
     );
 
     CheckPositive(
-        particle.EMax,
+        particle.pMax,
         "particleParams.EMax",
         errors
     );
@@ -818,21 +826,21 @@ void TestPrimaryGeneratorConfig(
 
 
     // ---------------------------------------------------------
-    // Energies constraint
+    // Momentum constraint
     // ---------------------------------------------------------
 
     if (
-        std::isfinite(particle.EMin)
-        && std::isfinite(particle.EMax)
-        && particle.EMin >= particle.EMax
+        std::isfinite(particle.pMin)
+        && std::isfinite(particle.pMax)
+        && particle.pMin >= particle.pMax
     ) {
         AddError(
             errors,
-            "Minimum energy must be smaller "
-            "than maximum energy."
+            "Minimum momoentum must be smaller "
+            "than maximum momentum."
         );
     }
-
+    
 
     // ---------------------------------------------------------
     // Final result

@@ -18,11 +18,6 @@
 PrimaryGeneratorAction::PrimaryGeneratorAction()
 {
     particleGun_ = new G4ParticleGun(1);
-
-    auto* particleTable = G4ParticleTable::GetParticleTable();
-    auto* pion = particleTable->FindParticle("pi+");
-
-    particleGun_->SetParticleDefinition(pion);
 }
 
 
@@ -77,10 +72,14 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
     );
 
 
-    // Particle Energy
+    // Particle
     const G4double uE = G4UniformRand();
-    const G4double Energy = particleParams->EMin + uE * (particleParams->EMax - particleParams->EMin);
-    particleGun_->SetParticleMomentum(Energy);
+    const G4double momentum = particleParams->pMin + uE * (particleParams->pMax - particleParams->pMin);
+    particleGun_->SetParticleMomentum(momentum);
+
+    auto* particleTable = G4ParticleTable::GetParticleTable();
+    auto* typeParticle = particleTable->FindParticle(particleParams->type);
+    particleGun_->SetParticleDefinition(typeParticle);
 
     particleGun_->GeneratePrimaryVertex(event);
 }
