@@ -1,6 +1,7 @@
 #include "na62rich/actions/PrimaryGeneratorAction.hh"
 
 #include "na62rich/io/DetectorConfig.hh"
+#include "na62rich/io/PrimaryGeneratorConfig.hh"
 
 #include "G4Event.hh"
 #include "G4ParticleGun.hh"
@@ -13,19 +14,6 @@
 
 
 #include "Randomize.hh"
-
-constexpr G4double decayRegionStart = -250 * m;
-constexpr G4double decayRegionLength = 65 * m;
-
-constexpr G4double decayCaracteristicLength = 3.711 * m;
-constexpr G4double meanEnergyKaon = 75 * GeV;
-constexpr G4double massKaon = 493.677 * MeV;
-
-constexpr G4double rMin = 10 * cm;
-constexpr G4double rMax = 1.5 * m;
-
-constexpr G4double phiMin = 0.0;
-constexpr G4double phiMax = twopi;
 
 PrimaryGeneratorAction::PrimaryGeneratorAction()
 {
@@ -50,18 +38,18 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
     const G4double uR = G4UniformRand();
     const G4double r =
         std::sqrt(
-            rMin * rMin
+            entranceParams->rMin * entranceParams->rMin
             + uR * (
-                rMax * rMax
-                - rMin * rMin
+                entranceParams->rMax * entranceParams->rMax
+                - entranceParams->rMin * entranceParams->rMin
             )
         );
     
     const G4double uP = G4UniformRand();
     const G4double phi = 
-        phiMin
+        entranceParams->phiMin
         + uP * (
-            phiMax - phiMin
+            entranceParams->phiMax - entranceParams->phiMin
         );
     
     const G4ThreeVector entrancePoint(
@@ -75,10 +63,10 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
     );
 
     const G4double uL = G4UniformRand();
-    const G4double zVirtualVertex = decayRegionStart + (uL * decayRegionLength);
+    const G4double zVirtualVertex = (uL * decayRegionParams->length) - decayRegionParams->start;
     const G4ThreeVector virtualVertex(
-        0.0,
-        0.0,
+        G4RandGauss::shoot(0.0, decayRegionParams->sigmaX),
+        G4RandGauss::shoot(0.0, decayRegionParams->sigmaY),
         zVirtualVertex
     );
 

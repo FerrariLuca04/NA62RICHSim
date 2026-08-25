@@ -6,4 +6,6 @@ target_sources(
         RootFileMerger.cc
         DetectorConfig.cc
         TestDetectorConfig.cc
+        ParsersConfig.cc
+        PrimaryGeneratorConfig.cc
 )

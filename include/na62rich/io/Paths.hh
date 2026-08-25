@@ -19,6 +19,9 @@ inline const std::filesystem::path configDirectory =
     "config";
 
 inline std::filesystem::path detectorConfigFile =
-    configDirectory / "detector_default.conf";
+    configDirectory / "default_detector.conf";
+    
+inline std::filesystem::path generatorConfigFile =
+    configDirectory / "default_generator.conf";
 
 #endif

@@ -75,22 +75,6 @@ extern GasParams* gasParams;
 extern MirrorParams* mirrorParams;
 extern PMTParams* pmtParams;
 
-void FillParams(const std::string& filename);
-
-std::string Trim(const std::string& str);
-G4double GetLengthUnit(const std::string& unit);
-G4double GetEnergyUnit(const std::string& unit);
-std::vector<G4double> ParseEnergyVector(
-    const std::string& text,
-    std::size_t lineNumber
-);
-std::vector<G4double> ParseDimensionlessVector(
-    const std::string& text,
-    std::size_t lineNumber
-);
-G4double ParseLength(
-    const std::string& text,
-    std::size_t lineNumber
-);
+void SetDetectorParams(const std::string& filename);
 
 #endif

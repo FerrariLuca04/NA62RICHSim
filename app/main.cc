@@ -8,6 +8,8 @@
 #include "na62rich/io/DetectorConfig.hh"
 #include "na62rich/io/TestDetectorConfig.hh"
 
+#include "na62rich/io/PrimaryGeneratorConfig.hh"
+
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"
 #include "G4UIExecutive.hh"
@@ -23,7 +25,8 @@ int main(int argc, char** argv)
 {   
     std::string macro = "";
     std::string output = "";
-    std::string config = "";
+    std::string configDetectorFlag = "";
+    std::string configGeneratorFlag = "";
 
     if (argc > 1) {
         for (int a = 0; a < argc; ++a){
@@ -46,19 +49,22 @@ int main(int argc, char** argv)
                 output = arg;
             }
             // Select config
-            else if (arg == "--macro") {
-                config = argv[a + 1];
+            else if (arg == "--config-detector") {
+                configDetectorFlag = argv[a + 1];
                 a += 1; //Skip the value
             }
-            else if (arg.ends_with(".conf")) {
-                config = arg;
+            else if (arg == "--config-generator") {
+                configGeneratorFlag = arg;
             }
         }
     }
 
     //Change directories
-    if (config != "") {
-        detectorConfigFile = configDirectory / config;
+    if (configDetectorFlag != "") {
+        detectorConfigFile = configDirectory / configDetectorFlag;
+    }
+    if (configGeneratorFlag != "") {
+        generatorConfigFile = configDirectory / configGeneratorFlag;
     }
     if (output != "") {
         outputFile = outputDirectory / output;
@@ -83,16 +89,23 @@ int main(int argc, char** argv)
     std::filesystem::create_directories(tmpDirectory);
 
     // ---------------------------------------------------------
-    // Detector setting
+    // Configuration setting
     // ---------------------------------------------------------
 
-    FillParams(detectorConfigFile.string());
+    SetDetectorParams(detectorConfigFile.string());
 
     TestDetectorConfig(
         *worldParams,
         *gasParams,
         *mirrorParams,
         *pmtParams
+    );
+
+    SetGeneratorParams(generatorConfigFile.string());
+
+    TestPrimaryGeneratorConfig(
+        *entranceParams,
+        *decayRegionParams
     );
 
     // ---------------------------------------------------------

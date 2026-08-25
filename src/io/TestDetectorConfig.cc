@@ -1,6 +1,9 @@
 #include "na62rich/io/TestDetectorConfig.hh"
 
 #include "na62rich/io/DetectorConfig.hh"
+#include "na62rich/io/PrimaryGeneratorConfig.hh"
+
+#include "G4SystemOfUnits.hh"
 
 #include <cmath>
 #include <sstream>
@@ -627,6 +630,189 @@ void TestDetectorConfig(
 
         message
             << "Invalid detector configuration. "
+            << errors.size()
+            << " error(s) found:\n";
+
+        for (const auto& error : errors) {
+            message << "  - " << error << '\n';
+        }
+
+        throw std::runtime_error(message.str());
+    }
+}
+
+
+void TestPrimaryGeneratorConfig(
+    const EntranceParams& entrance,
+    const DecayRegionParams& decayRegion
+)
+{
+    std::vector<std::string> errors;
+
+
+    // ---------------------------------------------------------
+    // Check that all scalar parameters are set
+    // ---------------------------------------------------------
+
+    CheckFieldSet(
+        entrance.rMin,
+        "entrance.rMin",
+        errors
+    );
+
+    CheckFieldSet(
+        entrance.rMax,
+        "entrance.rMax",
+        errors
+    );
+
+    CheckFieldSet(
+        entrance.phiMin,
+        "entrance.phiMin",
+        errors
+    );
+
+    CheckFieldSet(
+        entrance.phiMax,
+        "entrance.phiMax",
+        errors
+    );
+
+    CheckFieldSet(
+        decayRegion.start,
+        "decayRegion.start",
+        errors
+    );
+
+    CheckFieldSet(
+        decayRegion.length,
+        "decayRegion.length",
+        errors
+    );
+
+    CheckFieldSet(
+        decayRegion.sigmaX,
+        "decayRegion.sigmaX",
+        errors
+    );
+
+    CheckFieldSet(
+        decayRegion.sigmaY,
+        "decayRegion.sigmaY",
+        errors
+    );
+
+
+    // ---------------------------------------------------------
+    // Basic validity
+    // ---------------------------------------------------------
+
+    CheckNonNegative(
+        entrance.rMin,
+        "entrance.rMin",
+        errors
+    );
+
+    CheckPositive(
+        entrance.rMax,
+        "entrance.rMax",
+        errors
+    );
+
+    CheckPositive(
+        decayRegion.start,
+        "decayRegion.start",
+        errors
+    );
+
+    CheckPositive(
+        decayRegion.length,
+        "decayRegion.length",
+        errors
+    );
+
+    CheckNonNegative(
+        decayRegion.sigmaX,
+        "decayRegion.sigmaX",
+        errors
+    );
+
+    CheckNonNegative(
+        decayRegion.sigmaY,
+        "decayRegion.sigmaY",
+        errors
+    );
+
+
+    // ---------------------------------------------------------
+    // Entrance geometrical constraints
+    // ---------------------------------------------------------
+
+    if (
+        std::isfinite(entrance.rMin)
+        && std::isfinite(entrance.rMax)
+        && entrance.rMin >= entrance.rMax
+    ) {
+        AddError(
+            errors,
+            "Entrance minimum radius must be smaller "
+            "than entrance maximum radius."
+        );
+    }
+
+
+    if (
+        std::isfinite(entrance.phiMin)
+        && std::isfinite(entrance.phiMax)
+        && entrance.phiMin >= entrance.phiMax
+    ) {
+        AddError(
+            errors,
+            "Entrance minimum phi must be smaller "
+            "than entrance maximum phi."
+        );
+    }
+
+
+    if (
+        std::isfinite(entrance.phiMin)
+        && std::isfinite(entrance.phiMax)
+        && (entrance.phiMin >= 360 * deg || entrance.phiMax >= 360 * deg)
+    ) {
+        AddError(
+            errors,
+            "Entrance minimum and maximum phi "
+            "must be smaller than 360 deg."
+        );
+    }
+
+
+    // ---------------------------------------------------------
+    // Decay region constraints
+    // ---------------------------------------------------------
+
+    if (
+        std::isfinite(decayRegion.start)
+        && std::isfinite(decayRegion.length)
+        && decayRegion.start <= decayRegion.length
+    ) {
+        AddError(
+            errors,
+            "Decay region start must be greater "
+            "than decay region length."
+        );
+    }
+
+    // ---------------------------------------------------------
+    // Final result
+    // ---------------------------------------------------------
+
+    if (!errors.empty()) {
+
+        std::ostringstream message;
+
+        message
+            << "Invalid primary generator configuration. "
             << errors.size()
             << " error(s) found:\n";
 
