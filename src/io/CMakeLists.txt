@@ -5,5 +5,7 @@ target_sources(
     PRIVATE
         RootFileMerger.cc
         DetectorConfig.cc
-        TestDetectorConfig.cc
+        TestConfig.cc
+        ParsersConfig.cc
+        PrimaryGeneratorConfig.cc
 )

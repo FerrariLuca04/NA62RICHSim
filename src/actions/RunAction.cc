@@ -14,6 +14,7 @@ RunAction::RunAction()
         "Detected optical photons"
     );
 
+    analysisManager->CreateNtupleIColumn("runID");
     analysisManager->CreateNtupleIColumn("eventID");
     
     analysisManager->CreateNtupleIColumn("primary_pdg_code");

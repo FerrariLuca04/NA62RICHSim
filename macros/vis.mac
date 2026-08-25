@@ -13,18 +13,20 @@
 
 
 # Draw coordinate axes
-/vis/scene/add/axes 0 0 -15 2 m
+#/vis/scene/add/axes 0 0 -15 2 m
 
 
 # Surface rendering
-/vis/viewer/set/style wireframe
+/vis/viewer/set/style surface
 
-/vis/geometry/set/colour World    0 0.7 0.7 0.7 0.1
-/vis/geometry/set/colour Gas  0 0.0 1.0 0.0 1.0
+/vis/geometry/set/visibility World 0 false
+/vis/geometry/set/colour Gas  0 0.0 1.0 0.0 0.2
 
-/vis/set/touchable World 0 Gas 0 Juna 0
+/vis/geometry/set/colour PMT  0 0.85 0.80 0.35 1.0
+
+/vis/set/touchable World 0 Gas 0 Mirror 0
 /vis/touchable/set/colour 0.05 0.20 0.70 1.0
-/vis/set/touchable World 0 Gas 0 Saleve 0
+/vis/set/touchable World 0 Gas 0 Mirror 1
 /vis/touchable/set/colour 0.70 0.15 0.40 1.0
 
 # Initial camera direction
@@ -36,7 +38,7 @@
 
 
 # Keep trajectories from multiple events
-/vis/scene/endOfEventAction accumulate
+/vis/scene/endOfEventAction accumulate 1
 
 
 # Automatic refresh

@@ -36,3 +36,11 @@ I file di output vengono mergiati in un unico file `.root` che contiene un unico
 - Nuove `struct` per definire un oggetto unico con tutti i parametri fondamentali di un'oggetto in `DetectorCostruction` per inizializzare i detector;
 - Possibilitá di modificare la geometria, materiali e caratteristiche ottiche dei detector tramire `config/detector_default.conf` senza dover ricompilare il codice.
 - Aggiunta l'efficienza quantica dei PMT.
+
+### v.0.4.2 [25/08/26]:
+Modifiche sulla generazione delle particelle primarie con aggiunta del file `config/generator_default.conf`.
+- Nuove struct per definire un oggetto unico con tutti i parametri per la generazione dei primari;
+- Randomizzazione del punto d'ingresso della particella primaria correlata anche alla direzione, si utilizza l'estrazione randomica anche di un vertice primario;
+- Randomizzazione del momento della particella primaria usando una distribuzione uniforme;
+- Scelta della particella tramire file.conf;
+- Nuovo file di configurazione per i parametri della particella primaria.

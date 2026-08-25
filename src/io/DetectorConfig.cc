@@ -1,5 +1,7 @@
 #include "na62rich/io/DetectorConfig.hh"
 
+#include "na62rich/io/ParsersConfig.hh"
+
 #include "G4SystemOfUnits.hh"
 
 #include <algorithm>
@@ -14,7 +16,7 @@ GasParams* gasParams;
 MirrorParams* mirrorParams;
 PMTParams* pmtParams;
 
-void FillParams(const std::string& filename)
+void SetDetectorParams(const std::string& filename)
 {
     std::ifstream file(filename);
 
@@ -82,99 +84,91 @@ void FillParams(const std::string& filename)
 
 
         // Geometry
-        if (key == "worldLength") {
-            worldParams->length =
-                ParseLength(value, lineNumber);
-        }
-        else if (key == "worldHeight") {
-            worldParams->height =
-                ParseLength(value, lineNumber);
-        }
-        else if (key == "gasLength") {
+        if (key == "ga_length") {
             gasParams->length =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "gasRadius") {
+        else if (key == "gas_radius") {
             gasParams->radius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorCurvatureRadius") {
+        else if (key == "mirror_curvature_radius") {
             mirrorParams->curvatureRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorOuterRadius") {
+        else if (key == "mirror_outer_radius") {
             mirrorParams->outerRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorInnerRadius") {
+        else if (key == "mirror_inner_radius") {
             mirrorParams->innerRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorThickness") {
+        else if (key == "mirror_thickness") {
             mirrorParams->thickness =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorPositionZ") {
+        else if (key == "mirror_position_z") {
             mirrorParams->posZ =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "PMTradius") {
+        else if (key == "PMT_radius") {
             pmtParams->PMTradius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskRadius") {
+        else if (key == "disk_radius") {
             pmtParams->diskRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskThick") {
+        else if (key == "disk_thick") {
             pmtParams->thickness =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskPositionZ") {
+        else if (key == "disk_position_z") {
             pmtParams->posZ =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskPositionR") {
+        else if (key == "disk_position_r") {
             pmtParams->posR =
                 ParseLength(value, lineNumber);
         }
 
         // Materials
-        else if (key == "worldMaterial") {
+        else if (key == "world_material") {
             worldParams->material = value;
         }
-        else if (key == "gasMaterial") {
+        else if (key == "gas_material") {
             gasParams->material = value;
         }
-        else if (key == "mirrorMaterial") {
+        else if (key == "mirror_material") {
             mirrorParams->material = value;
         }
-        else if (key == "PMTmaterial") {
+        else if (key == "PMT_material") {
             pmtParams->material = value;
         }
 
         // Optical tables
-        else if (key == "neonPhotonEnergies") {
+        else if (key == "gas_photon_energies") {
             gasParams->photonEnergies =
                 ParseEnergyVector(value, lineNumber);
         }
-        else if (key == "neonRefractiveIndex") {
+        else if (key == "gas_refractive_index") {
             gasParams->refractiveIndex =
                 ParseDimensionlessVector(value, lineNumber);
         }
-        else if (key == "mirrorPhotonEnergies") {
+        else if (key == "mirror_photon_energies") {
             mirrorParams->photonEnergies =
                 ParseEnergyVector(value, lineNumber);
         }
-        else if (key == "mirrorReflectivity") {
+        else if (key == "mirror_reflectivity") {
             mirrorParams->reflectivity =
                 ParseDimensionlessVector(value, lineNumber);
         }
-        else if (key == "PMTphotonEnergies") {
+        else if (key == "PMT_photon_energies") {
             pmtParams->photonEnergies =
                 ParseEnergyVector(value, lineNumber);
         }
-        else if (key == "PMTefficiency") {
+        else if (key == "PMT_efficiency") {
             pmtParams->quantumEfficiency =
                 ParseDimensionlessVector(value, lineNumber);
         }
@@ -186,149 +180,4 @@ void FillParams(const std::string& filename)
     mirrorParams->posZ -= mirrorParams->thickness;
 
     pmtParams->posZ += (pmtParams->thickness) / 2.0;
-}
-
-std::string Trim(const std::string& str)
-{
-    const auto first = str.find_first_not_of(" \t\r\n");
-
-    if (first == std::string::npos) {
-        return "";
-    }
-
-    const auto last = str.find_last_not_of(" \t\r\n");
-
-    return str.substr(first, last - first + 1);
-}
-
-
-G4double GetLengthUnit(const std::string& unit)
-{
-    if (unit == "mm") {
-        return mm;
-    }
-
-    if (unit == "cm") {
-        return cm;
-    }
-
-    if (unit == "m") {
-        return m;
-    }
-
-    throw std::runtime_error(
-        "Unknown length unit: " + unit
-    );
-}
-
-
-G4double GetEnergyUnit(const std::string& unit)
-{
-    if (unit == "eV") {
-        return eV;
-    }
-
-    if (unit == "keV") {
-        return keV;
-    }
-
-    if (unit == "MeV") {
-        return MeV;
-    }
-
-    if (unit == "GeV") {
-        return GeV;
-    }
-
-    throw std::runtime_error(
-        "Unknown energy unit: " + unit
-    );
-}
-
-
-std::vector<G4double> ParseEnergyVector(
-    const std::string& text,
-    std::size_t lineNumber
-)
-{
-    std::vector<G4double> values;
-
-    std::stringstream stream(text);
-    std::string element;
-
-    while (std::getline(stream, element, ',')) {
-
-        element = Trim(element);
-
-        std::istringstream elementStream(element);
-
-        G4double value;
-        std::string unit;
-
-        if (!(elementStream >> value >> unit)) {
-            throw std::runtime_error(
-                "Invalid energy value at line "
-                + std::to_string(lineNumber)
-                + ": " + element
-            );
-        }
-
-        values.push_back(
-            value * GetEnergyUnit(unit)
-        );
-    }
-
-    return values;
-}
-
-
-std::vector<G4double> ParseDimensionlessVector(
-    const std::string& text,
-    std::size_t lineNumber
-)
-{
-    std::vector<G4double> values;
-
-    std::stringstream stream(text);
-    std::string element;
-
-    while (std::getline(stream, element, ',')) {
-
-        element = Trim(element);
-
-        try {
-            values.push_back(std::stod(element));
-        }
-        catch (const std::exception&) {
-            throw std::runtime_error(
-                "Invalid numerical value at line "
-                + std::to_string(lineNumber)
-                + ": " + element
-            );
-        }
-    }
-
-    return values;
-}
-
-
-G4double ParseLength(
-    const std::string& text,
-    std::size_t lineNumber
-)
-{
-    std::istringstream stream(text);
-
-    G4double value;
-    std::string unit;
-
-    if (!(stream >> value >> unit)) {
-        throw std::runtime_error(
-            "Invalid length at line "
-            + std::to_string(lineNumber)
-            + ": " + text
-        );
-    }
-
-    return value * GetLengthUnit(unit);
 }

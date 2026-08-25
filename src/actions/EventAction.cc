@@ -8,6 +8,9 @@
 #include "G4AnalysisManager.hh"
 #include "G4SystemOfUnits.hh"
 
+#include "G4RunManager.hh"
+#include "G4Run.hh"
+
 #include <vector>
 
 EventAction::EventAction(RunAction* runAction)
@@ -98,43 +101,51 @@ void EventAction::EndOfEventAction(const G4Event* event)
     // Fill the Ntuple
     // --------------------------------------------------------
     /*********************************************************/
+    auto* run = G4RunManager::GetRunManager()->GetCurrentRun();
+    G4int runID = run->GetRunID();
+    
     analysisManager->FillNtupleIColumn(
         0,
-        event->GetEventID()
+        run->GetRunID()
     );
     /*********************************************************/
     analysisManager->FillNtupleIColumn(
         1,
+        event->GetEventID()
+    );
+    /*********************************************************/
+    analysisManager->FillNtupleIColumn(
+        2,
         pdgCode
     );
     /*********************************************************/
     analysisManager->FillNtupleDColumn(
-        2,
+        3,
         momentum / GeV
     );
     analysisManager->FillNtupleDColumn(
-        3,
+        4,
         direction.x()
     );
     analysisManager->FillNtupleDColumn(
-        4,
+        5,
         direction.y()
     );
     analysisManager->FillNtupleDColumn(
-        5,
+        6,
         direction.z()
     );
     /*********************************************************/
     analysisManager->FillNtupleDColumn(
-        6,
+        7,
         primaryX / mm
     );
     analysisManager->FillNtupleDColumn(
-        7,
+        8,
         primaryY / mm
     );
     analysisManager->FillNtupleDColumn(
-        8,
+        9,
         primaryZ / m
     );
     /*********************************************************/
