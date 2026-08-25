@@ -84,99 +84,91 @@ void SetDetectorParams(const std::string& filename)
 
 
         // Geometry
-        if (key == "worldLength") {
-            worldParams->length =
-                ParseLength(value, lineNumber);
-        }
-        else if (key == "worldHeight") {
-            worldParams->height =
-                ParseLength(value, lineNumber);
-        }
-        else if (key == "gasLength") {
+        if (key == "ga_length") {
             gasParams->length =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "gasRadius") {
+        else if (key == "gas_radius") {
             gasParams->radius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorCurvatureRadius") {
+        else if (key == "mirror_curvature_radius") {
             mirrorParams->curvatureRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorOuterRadius") {
+        else if (key == "mirror_outer_radius") {
             mirrorParams->outerRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorInnerRadius") {
+        else if (key == "mirror_inner_radius") {
             mirrorParams->innerRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorThickness") {
+        else if (key == "mirror_thickness") {
             mirrorParams->thickness =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "mirrorPositionZ") {
+        else if (key == "mirror_position_z") {
             mirrorParams->posZ =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "PMTradius") {
+        else if (key == "PMT_radius") {
             pmtParams->PMTradius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskRadius") {
+        else if (key == "disk_radius") {
             pmtParams->diskRadius =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskThick") {
+        else if (key == "disk_thick") {
             pmtParams->thickness =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskPositionZ") {
+        else if (key == "disk_position_z") {
             pmtParams->posZ =
                 ParseLength(value, lineNumber);
         }
-        else if (key == "diskPositionR") {
+        else if (key == "disk_position_r") {
             pmtParams->posR =
                 ParseLength(value, lineNumber);
         }
 
         // Materials
-        else if (key == "worldMaterial") {
+        else if (key == "world_material") {
             worldParams->material = value;
         }
-        else if (key == "gasMaterial") {
+        else if (key == "gas_material") {
             gasParams->material = value;
         }
-        else if (key == "mirrorMaterial") {
+        else if (key == "mirror_material") {
             mirrorParams->material = value;
         }
-        else if (key == "PMTmaterial") {
+        else if (key == "PMT_material") {
             pmtParams->material = value;
         }
 
         // Optical tables
-        else if (key == "neonPhotonEnergies") {
+        else if (key == "gas_photon_energies") {
             gasParams->photonEnergies =
                 ParseEnergyVector(value, lineNumber);
         }
-        else if (key == "neonRefractiveIndex") {
+        else if (key == "gas_refractive_index") {
             gasParams->refractiveIndex =
                 ParseDimensionlessVector(value, lineNumber);
         }
-        else if (key == "mirrorPhotonEnergies") {
+        else if (key == "mirror_photon_energies") {
             mirrorParams->photonEnergies =
                 ParseEnergyVector(value, lineNumber);
         }
-        else if (key == "mirrorReflectivity") {
+        else if (key == "mirror_reflectivity") {
             mirrorParams->reflectivity =
                 ParseDimensionlessVector(value, lineNumber);
         }
-        else if (key == "PMTphotonEnergies") {
+        else if (key == "PMT_photon_energies") {
             pmtParams->photonEnergies =
                 ParseEnergyVector(value, lineNumber);
         }
-        else if (key == "PMTefficiency") {
+        else if (key == "PMT_efficiency") {
             pmtParams->quantumEfficiency =
                 ParseDimensionlessVector(value, lineNumber);
         }

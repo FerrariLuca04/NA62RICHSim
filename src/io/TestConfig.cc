@@ -247,69 +247,69 @@ void TestDetectorConfig(
     // Check that all scalar parameters are set
     // ---------------------------------------------------------
 
-    CheckFieldSet(world.length, "world.length", errors);
-    CheckFieldSet(world.height, "world.height", errors);
+    CheckFieldSet(world.length, "world_length", errors);
+    CheckFieldSet(world.height, "world_height", errors);
 
-    CheckFieldSet(gas.length, "gas.length", errors);
-    CheckFieldSet(gas.radius, "gas.radius", errors);
+    CheckFieldSet(gas.length, "gas_length", errors);
+    CheckFieldSet(gas.radius, "gas_radius", errors);
 
     CheckFieldSet(
         mirror.curvatureRadius,
-        "mirror.curvatureRadius",
+        "mirror_curvature_radius",
         errors
     );
 
     CheckFieldSet(
         mirror.outerRadius,
-        "mirror.outerRadius",
+        "mirror_outer_radius",
         errors
     );
 
     CheckFieldSet(
         mirror.innerRadius,
-        "mirror.innerRadius",
+        "mirror_inner_radius",
         errors
     );
 
     CheckFieldSet(
         mirror.thickness,
-        "mirror.thickness",
+        "mirror_thickness",
         errors
     );
 
     CheckFieldSet(
         mirror.posZ,
-        "mirror.posZ",
+        "mirror_position_z",
         errors
     );
 
     CheckFieldSet(
         pmt.PMTradius,
-        "pmt.PMTradius",
+        "PMT_radius",
         errors
     );
 
     CheckFieldSet(
         pmt.diskRadius,
-        "pmt.diskRadius",
+        "disk_radius",
         errors
     );
 
     CheckFieldSet(
         pmt.thickness,
-        "pmt.thickness",
+        "disk_thick",
         errors
     );
 
     CheckFieldSet(
         pmt.posR,
-        "pmt.posR",
+        "disk_position_z",
         errors
     );
 
     CheckFieldSet(
         pmt.posZ,
-        "pmt.posZ",
+        "disk_position_r",
         errors
     );
 
@@ -320,25 +320,25 @@ void TestDetectorConfig(
 
     CheckStringNotEmpty(
         world.material,
-        "world.material",
+        "world_material",
         errors
     );
 
     CheckStringNotEmpty(
         gas.material,
-        "gas.material",
+        "gas_material",
         errors
     );
 
     CheckStringNotEmpty(
         mirror.material,
-        "mirror.material",
+        "mirror_material",
         errors
     );
 
     CheckStringNotEmpty(
         pmt.material,
-        "pmt.material",
+        "PMT_material",
         errors
     );
 
@@ -347,15 +347,15 @@ void TestDetectorConfig(
     // Basic geometrical validity
     // ---------------------------------------------------------
 
-    CheckPositive(world.length, "world.length", errors);
-    CheckPositive(world.height, "world.height", errors);
+    CheckPositive(world.length, "world_length", errors);
+    CheckPositive(world.height, "world_height", errors);
 
-    CheckPositive(gas.length, "gas.length", errors);
-    CheckPositive(gas.radius, "gas.radius", errors);
+    CheckPositive(gas.length, "gas_length", errors);
+    CheckPositive(gas.radius, "gas_radius", errors);
 
     CheckPositive(
         mirror.curvatureRadius,
-        "mirror.curvatureRadius",
+        "mirror_curvature_radius",
         errors
     );
 
@@ -367,37 +367,37 @@ void TestDetectorConfig(
 
     CheckNonNegative(
         mirror.innerRadius,
-        "mirror.innerRadius",
+        "mirror_inner_radius",
         errors
     );
 
     CheckPositive(
         mirror.thickness,
-        "mirror.thickness",
+        "mirror_thickness",
         errors
     );
 
     CheckPositive(
         pmt.PMTradius,
-        "pmt.PMTradius",
+        "PMT_radius",
         errors
     );
 
     CheckPositive(
         pmt.diskRadius,
-        "pmt.diskRadius",
+        "disk_radius",
         errors
     );
 
     CheckPositive(
         pmt.thickness,
-        "pmt.thickness",
+        "disk_thick",
         errors
     );
 
     CheckNonNegative(
         pmt.posR,
-        "pmt.posR",
+        "disk_position_r",
         errors
     );
 
@@ -427,7 +427,7 @@ void TestDetectorConfig(
         AddError(
             errors,
             "PMT disk exceeds the outer gas radius: "
-            "pmt.posR + pmt.diskRadius > gas.radius."
+            "disk_position_r + disk_radius > gas_radius."
         );
     }
 
@@ -440,7 +440,7 @@ void TestDetectorConfig(
         AddError(
             errors,
             "PMT disk crosses the detector axis: "
-            "pmt.posR - pmt.diskRadius < 0."
+            "disk_position_r - disk_radius < 0."
         );
     }
 
@@ -516,37 +516,37 @@ void TestDetectorConfig(
 
     CheckVectorNotEmpty(
         gas.photonEnergies,
-        "gas.photonEnergies",
+        "gas_photon_energies",
         errors
     );
 
     CheckVectorNotEmpty(
         gas.refractiveIndex,
-        "gas.refractiveIndex",
+        "gas_refractive_index",
         errors
     );
 
     CheckVectorNotEmpty(
         mirror.photonEnergies,
-        "mirror.photonEnergies",
+        "mirror_photon_energies",
         errors
     );
 
     CheckVectorNotEmpty(
         mirror.reflectivity,
-        "mirror.reflectivity",
+        "mirror_reflectivity",
         errors
     );
 
     CheckVectorNotEmpty(
         pmt.photonEnergies,
-        "pmt.photonEnergies",
+        "PMT_photon_energies",
         errors
     );
 
     CheckVectorNotEmpty(
         pmt.quantumEfficiency,
-        "pmt.quantumEfficiency",
+        "PMT_efficiency",
         errors
     );
 
@@ -558,24 +558,24 @@ void TestDetectorConfig(
     CheckSameSize(
         gas.photonEnergies,
         gas.refractiveIndex,
-        "gas.photonEnergies",
-        "gas.refractiveIndex",
+        "gas_photon_energies",
+        "gas_refractive_index",
         errors
     );
 
     CheckSameSize(
         mirror.photonEnergies,
         mirror.reflectivity,
-        "mirror.photonEnergies",
-        "mirror.reflectivity",
+        "mirror_photon_energies",
+        "mirror_reflectivity",
         errors
     );
 
     CheckSameSize(
         pmt.photonEnergies,
         pmt.quantumEfficiency,
-        "pmt.photonEnergies",
-        "pmt.quantumEfficiency",
+        "PMT_photon_energies",
+        "PMT_efficiency",
         errors
     );
 
@@ -586,38 +586,38 @@ void TestDetectorConfig(
 
     CheckEnergyVector(
         gas.photonEnergies,
-        "gas.photonEnergies",
+        "gas_photon_energies",
         errors
     );
 
     CheckEnergyVector(
         mirror.photonEnergies,
-        "mirror.photonEnergies",
+        "mirror_photon_energies",
         errors
     );
 
     CheckEnergyVector(
         pmt.photonEnergies,
-        "pmt.photonEnergies",
+        "PMT_photon_energies",
         errors
     );
 
 
     CheckRefractiveIndex(
         gas.refractiveIndex,
-        "gas.refractiveIndex",
+        "gas_refractive_index",
         errors
     );
 
     CheckProbabilityVector(
         mirror.reflectivity,
-        "mirror.reflectivity",
+        "mirror_reflectivity",
         errors
     );
 
     CheckProbabilityVector(
         pmt.quantumEfficiency,
-        "pmt.quantumEfficiency",
+        "PMT_efficiency",
         errors
     );
 
@@ -659,55 +659,67 @@ void TestPrimaryGeneratorConfig(
 
     CheckFieldSet(
         entrance.rMin,
-        "entrance.rMin",
+        "entrance_radius_min",
         errors
     );
 
     CheckFieldSet(
         entrance.rMax,
-        "entrance.rMax",
+        "entrance_radius_max",
         errors
     );
 
     CheckFieldSet(
         entrance.phiMin,
-        "entrance.phiMin",
+        "entrance_phi_min",
         errors
     );
 
     CheckFieldSet(
         entrance.phiMax,
-        "entrance.phiMax",
+        "entrance_phi_max",
         errors
     );
 
     CheckFieldSet(
         decayRegion.start,
-        "decayRegion.start",
+        "decay_region_start",
         errors
     );
 
     CheckFieldSet(
         decayRegion.length,
-        "decayRegion.length",
+        "decay_region_length",
         errors
     );
 
     CheckFieldSet(
         decayRegion.sigmaX,
-        "decayRegion.sigmaX",
+        "decay_region_sigma_x",
         errors
     );
 
     CheckFieldSet(
         decayRegion.sigmaY,
-        "decayRegion.sigmaY",
+        "decay_region_sigma_y",
+        errors
+    );
+
+    CheckFieldSet(
+        particle.pMin,
+        "particle_momentum_min",
+        errors
+    );
+
+    CheckFieldSet(
+        particle.pMax,
+        "particle_momentum_max",
         errors
     );
 
     CheckStringNotEmpty(
         particle.type,
-        "particle.type",
+        "particle_type",
         errors
     );
 
@@ -718,49 +730,61 @@ void TestPrimaryGeneratorConfig(
 
     CheckNonNegative(
         entrance.rMin,
-        "entrance.rMin",
+        "entrance_radius_min",
         errors
     );
 
     CheckPositive(
         entrance.rMax,
-        "entrance.rMax",
+        "entrance_radius_max",
+        errors
+    );
+
+    CheckNonNegative(
+        entrance.phiMin,
+        "entrance_phi_min",
+        errors
+    );
+
+    CheckPositive(
+        entrance.phiMax,
+        "entrance_phi_max",
         errors
     );
 
     CheckPositive(
         decayRegion.start,
-        "decayRegion.start",
+        "decay_region_start",
         errors
     );
 
     CheckPositive(
         decayRegion.length,
-        "decayRegion.length",
+        "decay_region_length",
         errors
     );
 
     CheckNonNegative(
         decayRegion.sigmaX,
-        "decayRegion.sigmaX",
+        "decay_region_sigma_x",
         errors
     );
 
     CheckNonNegative(
         decayRegion.sigmaY,
-        "decayRegion.sigmaY",
+        "decay_region_sigma_y",
         errors
     );
 
     CheckNonNegative(
         particle.pMin,
-        "particleParams.EMin",
+        "particle_momentum_min",
         errors
     );
 
     CheckPositive(
         particle.pMax,
-        "particleParams.EMax",
+        "particle_momentum_max",
         errors
     );
 

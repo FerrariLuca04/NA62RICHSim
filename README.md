@@ -6,6 +6,8 @@ The project aims to reproduce the main components and response of the NA62 Ring 
 
 In addition, a secondary goal is to allow users to configure and test custom RICH detector setups inspired by the NA62 design.
 
+> [!NOTE]
+>
 > This project is developed for educational and simulation studies and is not an official NA62 software package.
 
 ## Structure
@@ -29,6 +31,8 @@ NA62RICHSim/
 * Geant4 11.x
 * ROOT
 
+> [!WARNING]
+>
 > The Geant4 installation must include support for optical physics and visualization.
 
 ## Compiling
@@ -95,6 +99,8 @@ or:
 ./build/bin/na62_rich_sim --macro macro.mac
 ```
 
+> [!WARNING]
+>
 > Macro files (`.mac`) must be located in the `macros/` directory.
 
 
@@ -126,28 +132,51 @@ The file contains a `TTree` named `PhotonHits`, with one entry for each simulate
 
 For the complete output data structure, see [Output format](docs/output.md).
 
-## Detector configuration
+## Configuration
+
+### Detector
 
 The default detector configuration is stored in:
 
-```text
+```text id="yrqpj2"
 config/detector_default.conf
 ```
 
 This file contains the geometrical and material parameters used to construct the detector.
 
-You can modify the configuration file and run the program again without recompiling it. This allows you to change the detector geometry and materials independently of the source code.
+You can modify this file and run the program again without recompiling it. This allows you to change the detector geometry and materials independently of the source code.
 
-You can also create a custom `.conf` file and select it using the `--config-detector` argument:
+To select a custom detector configuration file, use the `--config-detector` argument:
 
 ```bash
 ./build/bin/na62_rich_sim --config-detector name_file.conf
 ```
 
-Alternatively, a `.conf` file can be passed directly as a command-line argument:
+### Primary generator
 
-```bash
-./build/bin/na62_rich_sim name_file.conf
+The default primary generator configuration is stored in:
+
+```text id="d5dlop"
+config/generator_default.conf
 ```
 
-> Config files (`.conf`) must be located in the `config/` directory.
+This file defines the ranges used to randomly generate the primary particle properties, including:
+
+* the entrance point;
+* the virtual decay vertex, used to determine the particle direction;
+* the primary-particle momentum.
+
+As with the detector configuration, you can modify this file and run the program again without recompiling it.
+
+To select a custom generator configuration file, use the `--config-generator` argument:
+
+```bash
+./build/bin/na62_rich_sim --config-generator name_file.conf
+```
+
+For the complete list of available configuration keywords, see [Configuration reference](docs/configuration.md).
+
+> [!WARNING] 
+>
+> Configuration files (`.conf`) must be located in the `config/` directory.
+
