@@ -84,7 +84,7 @@ void SetDetectorParams(const std::string& filename)
 
 
         // Geometry
-        if (key == "ga_length") {
+        if (key == "gas_length") {
             gasParams->length =
                 ParseLength(value, lineNumber);
         }

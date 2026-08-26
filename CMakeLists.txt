@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
     NA62RICHSim
-    VERSION 0.4.2
+    VERSION 1.0.0
     DESCRIPTION "Educational Geant4 simulation of the NA62 RICH detector"
     LANGUAGES CXX
 )
@@ -56,3 +56,9 @@ set_target_properties(
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin"
 )
+
+include(CTest)
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
