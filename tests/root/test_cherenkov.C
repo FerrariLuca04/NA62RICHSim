@@ -2,12 +2,19 @@
 #include <TFile.h>
 #include <TH2D.h>
 #include <TTree.h>
+#include <TH1D.h>
+#include <TGraph.h>
+#include <TSystem.h>
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
 
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
+#include <numeric>
 
 // ---------------------------------------------------------
 // Utility functions
@@ -146,6 +153,55 @@ double GetMaximumHitCoordinate(
     return maximum;
 }
 
+double ExpectedCherenkovRadius(
+    double momentumGeV,
+    double particleMassGeV,
+    double refractiveIndex,
+    double focalLengthMm
+)
+{
+    const double energyGeV =
+        std::sqrt(
+            momentumGeV * momentumGeV +
+            particleMassGeV * particleMassGeV
+        );
+
+    const double beta =
+        momentumGeV / energyGeV;
+
+    const double cosTheta =
+        1.0 / (refractiveIndex * beta);
+
+    // Below Cherenkov threshold
+    if (cosTheta >= 1.0) {
+        return -10.0;
+    }
+
+    const double theta =
+        std::acos(cosTheta);
+
+    return focalLengthMm *
+        std::tan(theta);
+}
+
+double GetParticleMassGeV(int pdgCode)
+{
+    const auto* particle =
+        TDatabasePDG::Instance()
+            ->GetParticle(pdgCode);
+
+    if (!particle) {
+        std::cerr
+            << "[ERROR] Unknown PDG code: "
+            << pdgCode
+            << '\n';
+
+        return -1.0;
+    }
+
+    return particle->Mass();
+}
+
 // ---------------------------------------------------------
 // Plot ring radius vs primary momentum
 // ---------------------------------------------------------
@@ -202,7 +258,8 @@ int ValidateCherenkovProcess(
     if (
         !tree->GetBranch("primary_momentum_GeV") ||
         !tree->GetBranch("hit_x_mm") ||
-        !tree->GetBranch("hit_y_mm")
+        !tree->GetBranch("hit_y_mm") ||
+        !tree->GetBranch("primary_pdg_code")
     ) {
         std::cerr
             << "[FAIL] Missing required branch\n";
@@ -226,6 +283,8 @@ int ValidateCherenkovProcess(
     std::vector<double>* hitX = nullptr;
     std::vector<double>* hitY = nullptr;
 
+    int pdgCode = 0;
+
     tree->SetBranchAddress(
         "primary_momentum_GeV",
         &momentumGeV
@@ -239,6 +298,11 @@ int ValidateCherenkovProcess(
     tree->SetBranchAddress(
         "hit_y_mm",
         &hitY
+    );
+
+    tree->SetBranchAddress(
+        "primary_pdg_code",
+        &pdgCode
     );
 
     // -----------------------------------------------------
@@ -271,6 +335,9 @@ int ValidateCherenkovProcess(
 
     if (
         !treeDetector->GetBranch("mirror_outer_radius_mm") ||
+        !treeDetector->GetBranch("mirror_curvature_radius_m") ||
+
+        !treeDetector->GetBranch("gas_refractive_index") ||
         
         !treeGenerator->GetBranch("particle_momentum_min_GeV") ||
         !treeGenerator->GetBranch("particle_momentum_max_GeV")
@@ -286,12 +353,27 @@ int ValidateCherenkovProcess(
     // -----------------------------------------------------
 
     double mirrorOuterRadius = 0.0;
+    double mirrorCurvatureRadius = 0.0;
+
+    std::vector<double>* refractiveIndexVector = nullptr;
+
     double momentumMinGeV = 0.0;
     double momentumMaxGeV = 0.0;
 
     treeDetector->SetBranchAddress(
         "mirror_outer_radius_mm",
         &mirrorOuterRadius
+    );
+
+    treeDetector->SetBranchAddress(
+        "mirror_curvature_radius_m",
+        &mirrorCurvatureRadius
+    );
+
+
+    treeDetector->SetBranchAddress(
+        "gas_refractive_index",
+        &refractiveIndexVector
     );
 
     treeGenerator->SetBranchAddress(
@@ -306,8 +388,25 @@ int ValidateCherenkovProcess(
     treeGenerator->GetEntry(0);
     treeDetector->GetEntry(0);
 
+    if (!refractiveIndexVector || refractiveIndexVector->empty()) {
+        std::cerr
+            << "[FAIL] Invalid refractive index configuration\n";
+
+        return 1;
+    }
+
+    const double focalLengthMm = mirrorCurvatureRadius * 1000.0 / 2.0;
+
+    const double meanRefractiveIndex =
+        std::accumulate(
+            refractiveIndexVector->begin(),
+            refractiveIndexVector->end(),
+            0.0
+        ) /
+        static_cast<double>(refractiveIndexVector->size());
+
     // -----------------------------------------------------
-    // Create histogram
+    // Create histograms
     // -----------------------------------------------------
 
     auto* histogram = new TH2D(
@@ -326,6 +425,20 @@ int ValidateCherenkovProcess(
         radiusScale * 1.25
     );
 
+    auto* residualHistogram = new TH1D(
+        "relative_radius_residual",
+
+        "Relative Cherenkov radius residual;"
+        "(R_{meas} - R_{exp}) / R_{exp};"
+        "Events",
+
+        100,
+        -0.1,
+        0.1
+    );
+
+    residualHistogram->SetDirectory(nullptr);
+
     histogram->SetDirectory(nullptr);
 
 
@@ -334,6 +447,11 @@ int ValidateCherenkovProcess(
     // -----------------------------------------------------
 
     const Long64_t entries = tree->GetEntries();
+
+    double deltaSum = 0.0;
+    double deltaSquaredSum = 0.0;
+
+    std::set<double> particleMassesGeV;
 
     Long64_t validEvents = 0;
 
@@ -355,6 +473,24 @@ int ValidateCherenkovProcess(
             continue;
         }
 
+        // -------------------------------------------------
+        // Predict ring radius
+        // -------------------------------------------------
+
+        const double massGeV = GetParticleMassGeV(pdgCode);
+        particleMassesGeV.insert(massGeV);
+
+        const double radiusPredictMm =
+            ExpectedCherenkovRadius(
+                momentumGeV,
+                massGeV,
+                meanRefractiveIndex,
+                focalLengthMm
+            );
+        
+        if (radiusPredictMm <= 0.0) {
+            continue;
+        }
 
         // -------------------------------------------------
         // Estimate ring radius
@@ -372,6 +508,16 @@ int ValidateCherenkovProcess(
             continue;
         }
 
+        // -------------------------------------------------
+        // Residuals
+        // -------------------------------------------------
+
+        double delta = (radiusMm - radiusPredictMm) / radiusPredictMm;
+
+        deltaSum += delta;
+        deltaSquaredSum += delta * delta;
+
+        residualHistogram->Fill(delta);
 
         // -------------------------------------------------
         // Fill histogram
@@ -384,20 +530,6 @@ int ValidateCherenkovProcess(
 
         ++validEvents;
     }
-
-
-    // -----------------------------------------------------
-    // Print summary
-    // -----------------------------------------------------
-
-    std::cout
-        << "Events in tree: "
-        << entries
-        << '\n'
-        << "Events with reconstructed radius: "
-        << validEvents
-        << '\n';
-
 
     // -----------------------------------------------------
     // Draw histogram
@@ -412,6 +544,47 @@ int ValidateCherenkovProcess(
 
     histogram->Draw("COLZ");
 
+    // -----------------------------------------------------
+    // Draw expected graph
+    // -----------------------------------------------------
+
+    int theoryPoints = momentumBins * 10;
+
+    for (const double m : particleMassesGeV) {
+        auto* expectedRadiusGraph =
+            new TGraph(theoryPoints);
+
+        for (int i = 0; i < theoryPoints; ++i) {
+
+            const double fraction =
+                static_cast<double>(i) /
+                static_cast<double>(theoryPoints - 1);
+
+            const double momentum =
+                momentumMinGeV +
+                fraction *
+                (momentumMaxGeV - momentumMinGeV);
+
+            const double radius =
+                ExpectedCherenkovRadius(
+                    momentum,
+                    m,
+                    meanRefractiveIndex,
+                    focalLengthMm
+                );
+
+            expectedRadiusGraph->SetPoint(
+                i,
+                momentum,
+                radius
+            );
+        }
+
+        expectedRadiusGraph->SetLineWidth(1);
+        expectedRadiusGraph->SetLineColor(kRed);
+        expectedRadiusGraph->Draw("L SAME");
+    }
+
     canvas->Modified();
     canvas->Update();
 
@@ -423,6 +596,74 @@ int ValidateCherenkovProcess(
         << "Plot saved in: "
         << "output/ring_radius_vs_momentum.pdf"
         << '\n';
+
+    auto* residualCanvas = new TCanvas(
+        "residuals_canvas",
+        "Residuals histrogram",
+        900,
+        700
+    );
+
+    residualHistogram->Draw("COLZ");
+
+    residualCanvas->Modified();
+    residualCanvas->Update();
+
+    residualCanvas->SaveAs(
+        "output/residuals.pdf"
+    );
+
+    std::cout
+        << "Plot saved in: "
+        << "output/residuals.pdf"
+        << '\n';
+
+    // -----------------------------------------------------
+    // Compare bias and RMS estimator
+    // -----------------------------------------------------
+
+    if (validEvents == 0) {
+        std::cerr
+            << "[FAIL] No valid events for Cherenkov validation\n";
+
+        return 1;
+    }
+
+    const double meanDelta = deltaSum / validEvents;
+    const double rmsDelta = std::sqrt(deltaSquaredSum / validEvents);
+
+    constexpr double maxMeanDelta = 0.01;
+    constexpr double maxSigmaDelta = 0.03;
+
+    if (
+        std::abs(meanDelta) > maxMeanDelta ||
+        rmsDelta > maxSigmaDelta
+    ) {
+        std::cerr
+            << "[FAIL] Cherenkov radius validation failed\n";
+
+        return 1;
+    }
+
+    // -----------------------------------------------------
+    // Print summary
+    // -----------------------------------------------------
+
+    std::cout
+        << "Events in tree: "
+        << entries
+        << '\n'
+        << "Events with reconstructed radius: "
+        << validEvents
+        << '\n'
+        << "Cherenkov radius validation\n"
+        << "  Mean residual:  "
+        << meanDelta * 100.0
+        << " %\n"
+        << "  RMS residual:   "
+        << rmsDelta * 100.0
+        << " %\n";
+
 
     return 0;
 }

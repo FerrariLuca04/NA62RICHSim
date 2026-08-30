@@ -5,16 +5,16 @@
 /run/initialize
 
 /gun/particle pi+
-/run/beamOn 10000
+/run/beamOn 100
 
 /gun/particle kaon+
-/run/beamOn 10000
+/run/beamOn 100
 
 /gun/particle mu+
-/run/beamOn 10000
+/run/beamOn 100
 
 /gun/particle proton
-/run/beamOn 10000
+/run/beamOn 100
 
 /gun/particle e-
-/run/beamOn 10000
+/run/beamOn 100
