@@ -48,3 +48,9 @@ if(NOT validation_result EQUAL 0)
         "Validation failed with exit code ${validation_result}"
     )
 endif()
+
+# ---------------------------------------------------------
+# Cleanup old ROOT files
+# ---------------------------------------------------------
+
+file(REMOVE "${OUTPUT_FILE}")
