@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-bool MergeRootFiles()
+std::filesystem::path MergeRootFiles()
 {
     TFileMerger merger;
 
@@ -37,7 +37,13 @@ bool MergeRootFiles()
         }
     }
 
-    return merger.Merge();
+    if (!merger.Merge()) {
+        throw std::runtime_error(
+            "Failed to merge ROOT files."
+        );
+    }
+
+    return newOutputFile;
 }
 
 std::filesystem::path makeUniquePath(const std::filesystem::path& path) 

@@ -3,7 +3,7 @@
 
 #include <filesystem>
 
-bool MergeRootFiles();
+std::filesystem::path MergeRootFiles();
 
 std::filesystem::path makeUniquePath(const std::filesystem::path& path);
 

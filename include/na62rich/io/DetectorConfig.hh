@@ -7,6 +7,8 @@
 #include <vector>
 #include <limits>
 
+class TFile;
+
 struct WorldParams
 {
     G4double length =
@@ -76,5 +78,7 @@ extern MirrorParams* mirrorParams;
 extern PMTParams* pmtParams;
 
 void SetDetectorParams(const std::string& filename);
+
+void WriteDetectorConfig(TFile& file);
 
 #endif

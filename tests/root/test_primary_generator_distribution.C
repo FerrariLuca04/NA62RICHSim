@@ -50,7 +50,10 @@ double UniformKSPValue(std::vector<double> values)
         return 0.0;
     }
 
-    std::sort(values.begin(), values.end());
+    std::sort(
+        values.begin(),
+        values.end()
+    );
 
     const double n =
         static_cast<double>(values.size());
@@ -82,9 +85,9 @@ double UniformKSPValue(std::vector<double> values)
     const double d =
         std::max(dPlus, dMinus);
 
-    const double sqrtN = std::sqrt(n);
+    const double sqrtN =
+        std::sqrt(n);
 
-    // Finite-sample correction
     const double lambda =
         (sqrtN + 0.12 + 0.11 / sqrtN) * d;
 
@@ -98,36 +101,146 @@ double UniformKSPValue(std::vector<double> values)
 
 int ValidatePrimaryGeneratorDistribution(
     const char* filename,
-
-    double pMinGeV,
-    double pMaxGeV,
-
-    double rMinMm,
-    double rMaxMm,
-
-    double phiMinDeg,
-    double phiMaxDeg,
-
     Long64_t expectedEntries = -1,
     double minimumPValue = 1.0e-3
 )
 {
     // -----------------------------------------------------
-    // Check parameters
+    // Open ROOT file
     // -----------------------------------------------------
 
-    if (pMinGeV >= pMaxGeV) {
+    TFile file(filename, "READ");
+
+    if (file.IsZombie()) {
         std::cerr
-            << "[FAIL] Invalid momentum interval\n";
+            << "[FAIL] Cannot open ROOT file: "
+            << filename
+            << '\n';
 
         return 1;
     }
 
-    if (rMinMm >= rMaxMm) {
+
+    // -----------------------------------------------------
+    // Get PrimaryGeneratorConfig tree
+    // -----------------------------------------------------
+
+    TTree* configTree = nullptr;
+
+    file.GetObject(
+        "PrimaryGeneratorConfig",
+        configTree
+    );
+
+    if (!configTree) {
         std::cerr
-            << "[FAIL] Invalid radial interval\n";
+            << "[FAIL] TTree 'PrimaryGeneratorConfig' "
+            << "not found\n";
 
         return 2;
+    }
+
+    if (configTree->GetEntries() != 1) {
+        std::cerr
+            << "[FAIL] PrimaryGeneratorConfig must contain "
+            << "exactly one entry, got "
+            << configTree->GetEntries()
+            << '\n';
+
+        return 3;
+    }
+
+
+    // -----------------------------------------------------
+    // Check configuration branches
+    // -----------------------------------------------------
+
+    const std::vector<std::string> requiredConfigBranches = {
+        "particle_momentum_min_GeV",
+        "particle_momentum_max_GeV",
+        "entrance_radius_min_mm",
+        "entrance_radius_max_mm",
+        "entrance_phi_min_deg",
+        "entrance_phi_max_deg"
+    };
+
+    for (const auto& branch : requiredConfigBranches) {
+
+        if (!configTree->GetBranch(branch.c_str())) {
+            std::cerr
+                << "[FAIL] Missing configuration branch: "
+                << branch
+                << '\n';
+
+            return 4;
+        }
+    }
+
+
+    // -----------------------------------------------------
+    // Read generator configuration
+    // -----------------------------------------------------
+
+    Double_t pMinGeV = 0.0;
+    Double_t pMaxGeV = 0.0;
+
+    Double_t rMinMm = 0.0;
+    Double_t rMaxMm = 0.0;
+
+    Double_t phiMinDeg = 0.0;
+    Double_t phiMaxDeg = 0.0;
+
+    configTree->SetBranchAddress(
+        "particle_momentum_min_GeV",
+        &pMinGeV
+    );
+
+    configTree->SetBranchAddress(
+        "particle_momentum_max_GeV",
+        &pMaxGeV
+    );
+
+    configTree->SetBranchAddress(
+        "entrance_radius_min_mm",
+        &rMinMm
+    );
+
+    configTree->SetBranchAddress(
+        "entrance_radius_max_mm",
+        &rMaxMm
+    );
+
+    configTree->SetBranchAddress(
+        "entrance_phi_min_deg",
+        &phiMinDeg
+    );
+
+    configTree->SetBranchAddress(
+        "entrance_phi_max_deg",
+        &phiMaxDeg
+    );
+
+    configTree->GetEntry(0);
+
+
+    // -----------------------------------------------------
+    // Validate configuration
+    // -----------------------------------------------------
+
+    if (pMinGeV >= pMaxGeV) {
+        std::cerr
+            << "[FAIL] Invalid momentum interval in "
+            << "PrimaryGeneratorConfig\n";
+
+        return 5;
+    }
+
+    if (rMinMm >= rMaxMm) {
+        std::cerr
+            << "[FAIL] Invalid entrance radial interval in "
+            << "PrimaryGeneratorConfig\n";
+
+        return 6;
     }
 
     const double phiMin =
@@ -144,30 +257,15 @@ int ValidatePrimaryGeneratorDistribution(
         phiWidth > 2.0 * TMath::Pi()
     ) {
         std::cerr
-            << "[FAIL] Invalid phi interval\n";
+            << "[FAIL] Invalid entrance phi interval in "
+            << "PrimaryGeneratorConfig\n";
 
-        return 3;
+        return 7;
     }
 
 
     // -----------------------------------------------------
-    // Open ROOT file
-    // -----------------------------------------------------
-
-    TFile file(filename, "READ");
-
-    if (file.IsZombie()) {
-        std::cerr
-            << "[FAIL] Cannot open ROOT file: "
-            << filename
-            << '\n';
-
-        return 4;
-    }
-
-
-    // -----------------------------------------------------
-    // Get tree
+    // Get PhotonHits tree
     // -----------------------------------------------------
 
     TTree* tree = nullptr;
@@ -181,12 +279,12 @@ int ValidatePrimaryGeneratorDistribution(
         std::cerr
             << "[FAIL] TTree 'PhotonHits' not found\n";
 
-        return 5;
+        return 8;
     }
 
 
     // -----------------------------------------------------
-    // Check required branches
+    // Check required event branches
     // -----------------------------------------------------
 
     const std::vector<std::string> requiredBranches = {
@@ -199,11 +297,11 @@ int ValidatePrimaryGeneratorDistribution(
 
         if (!tree->GetBranch(branch.c_str())) {
             std::cerr
-                << "[FAIL] Missing branch: "
+                << "[FAIL] Missing PhotonHits branch: "
                 << branch
                 << '\n';
 
-            return 6;
+            return 9;
         }
     }
 
@@ -217,9 +315,9 @@ int ValidatePrimaryGeneratorDistribution(
 
     if (entries == 0) {
         std::cerr
-            << "[FAIL] TTree contains no entries\n";
+            << "[FAIL] PhotonHits contains no entries\n";
 
-        return 7;
+        return 10;
     }
 
     if (
@@ -233,12 +331,12 @@ int ValidatePrimaryGeneratorDistribution(
             << entries
             << '\n';
 
-        return 8;
+        return 11;
     }
 
 
     // -----------------------------------------------------
-    // Connect branches
+    // Connect PhotonHits branches
     // -----------------------------------------------------
 
     Double_t momentumGeV = 0.0;
@@ -265,7 +363,7 @@ int ValidatePrimaryGeneratorDistribution(
     // -----------------------------------------------------
     // Normalized distributions
     //
-    // If generation is correct:
+    // Correct generation implies:
     //
     // uP   ~ U(0,1)
     // uR2  ~ U(0,1)
@@ -308,12 +406,11 @@ int ValidatePrimaryGeneratorDistribution(
             !std::isfinite(vertexYmm)
         ) {
             std::cerr
-                << "[FAIL] Non-finite value "
-                << "at entry "
+                << "[FAIL] Non-finite value at entry "
                 << i
                 << '\n';
 
-            return 9;
+            return 12;
         }
 
 
@@ -326,14 +423,14 @@ int ValidatePrimaryGeneratorDistribution(
             momentumGeV > pMaxGeV + tolerance
         ) {
             std::cerr
-                << "[FAIL] Momentum outside range "
+                << "[FAIL] Momentum outside configured range "
                 << "at entry "
                 << i
                 << ": "
                 << momentumGeV
                 << " GeV/c\n";
 
-            return 10;
+            return 13;
         }
 
         double uP =
@@ -362,15 +459,15 @@ int ValidatePrimaryGeneratorDistribution(
             rSquared > rMaxSquared + tolerance
         ) {
             std::cerr
-                << "[FAIL] Entrance point outside radial range "
-                << "at entry "
+                << "[FAIL] Entrance point outside "
+                << "configured radial range at entry "
                 << i
                 << '\n'
                 << "       r = "
                 << std::sqrt(rSquared)
                 << " mm\n";
 
-            return 11;
+            return 14;
         }
 
         double uR2 =
@@ -410,15 +507,15 @@ int ValidatePrimaryGeneratorDistribution(
             deltaPhi > phiWidth + tolerance
         ) {
             std::cerr
-                << "[FAIL] Entrance phi outside range "
-                << "at entry "
+                << "[FAIL] Entrance phi outside "
+                << "configured range at entry "
                 << i
                 << '\n'
                 << "       phi = "
                 << phi * 180.0 / TMath::Pi()
                 << " deg\n";
 
-            return 12;
+            return 15;
         }
 
         double uPhi =
@@ -455,12 +552,35 @@ int ValidatePrimaryGeneratorDistribution(
 
 
     // -----------------------------------------------------
-    // Print results
+    // Print configuration
     // -----------------------------------------------------
 
     std::cout
-        << "\n"
-        << "Primary generator distribution test\n"
+        << "\nPrimary generator configuration\n"
+        << "-----------------------------------\n"
+        << "Momentum: ["
+        << pMinGeV
+        << ", "
+        << pMaxGeV
+        << "] GeV/c\n"
+        << "Entrance radius: ["
+        << rMinMm
+        << ", "
+        << rMaxMm
+        << "] mm\n"
+        << "Entrance phi: ["
+        << phiMinDeg
+        << ", "
+        << phiMaxDeg
+        << "] deg\n";
+
+
+    // -----------------------------------------------------
+    // Print statistical results
+    // -----------------------------------------------------
+
+    std::cout
+        << "\nPrimary generator distribution test\n"
         << "-----------------------------------\n"
         << "Events: "
         << entries
@@ -546,7 +666,7 @@ int ValidatePrimaryGeneratorDistribution(
 
 
     if (!success) {
-        return 13;
+        return 16;
     }
 
 
@@ -564,16 +684,6 @@ int ValidatePrimaryGeneratorDistribution(
 
 void test_primary_generator_distribution(
     const char* filename,
-
-    double pMinGeV,
-    double pMaxGeV,
-
-    double rMinMm,
-    double rMaxMm,
-
-    double phiMinDeg,
-    double phiMaxDeg,
-
     Long64_t expectedEntries = -1,
     double minimumPValue = 1.0e-3
 )
@@ -581,16 +691,6 @@ void test_primary_generator_distribution(
     const int result =
         ValidatePrimaryGeneratorDistribution(
             filename,
-
-            pMinGeV,
-            pMaxGeV,
-
-            rMinMm,
-            rMaxMm,
-
-            phiMinDeg,
-            phiMaxDeg,
-
             expectedEntries,
             minimumPValue
         );

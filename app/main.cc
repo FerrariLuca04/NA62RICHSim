@@ -9,6 +9,8 @@
 #include "na62rich/io/PrimaryGeneratorConfig.hh"
 #include "na62rich/io/TestConfig.hh"
 
+#include "TFile.h"
+
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"
 #include "G4UIExecutive.hh"
@@ -212,17 +214,41 @@ int main(int argc, char** argv)
     // Output files
     // ---------------------------------------------------------
 
-    std::cout<<
-        "Simulation ends successfully."
-    <<std::endl;
+    std::cout
+        <<"Simulation ends successfully."
+        <<std::endl;
 
-    MergeRootFiles();
+    const auto mergedOutputFile = MergeRootFiles();
 
-    std::cout<<
-        "Temporary files merged successfully."
-    <<std::endl;
+    std::cout
+        <<"Temporary files merged in "
+        <<mergedOutputFile.string()
+        <<" successfully."
+        <<std::endl;
 
     std::filesystem::remove_all(tmpDirectory);
+
+    std::cout
+        <<"Saving configuration parameters."
+        <<std::endl;
+
+    TFile file(
+        mergedOutputFile.string().c_str(),
+        "UPDATE"
+    );
+
+    if (file.IsZombie()) {
+        throw std::runtime_error(
+            "Cannot open final ROOT file: "
+            + mergedOutputFile.string()
+        );
+    }
+
+    WriteDetectorConfig(file);
+
+    WriteGeneratorConfig(file);
+
+    file.Close();
 
     // ---------------------------------------------------------
     // Cleanup
@@ -231,9 +257,9 @@ int main(int argc, char** argv)
     delete visManager;
     delete runManager;
 
-    std::cout<<
-        "Program is ended."
-    <<std::endl;
+    std::cout
+        <<"Program is ended."
+        <<std::endl;
 
     return 0;
 }
