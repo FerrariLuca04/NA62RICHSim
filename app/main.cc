@@ -9,6 +9,8 @@
 #include "na62rich/io/PrimaryGeneratorConfig.hh"
 #include "na62rich/io/TestConfig.hh"
 
+#include "TFile.h"
+
 #include "G4RunManagerFactory.hh"
 #include "G4UImanager.hh"
 #include "G4UIExecutive.hh"
@@ -22,60 +24,59 @@
 
 int main(int argc, char** argv)
 {   
+    // ---------------------------------------------------------
+    // Parse commands
+    // ---------------------------------------------------------
+
     std::string macro = "";
     std::string output = "";
-    std::string configDetectorFlag = "";
-    std::string configGeneratorFlag = "";
+    std::string configDetector = "";
+    std::string configGenerator = "";
 
     if (argc > 1) {
-        for (int a = 0; a < argc; ++a){
+        for (int a = 1; a < argc; ++a){
             std::string arg = argv[a];
 
             // Select macro
             if (arg == "--macro") {
-                macro = argv[a + 1];
-                a += 1; //Skip the value
+                macro = argv[++a];
             }
             else if (arg.ends_with(".mac")) {
                 macro = arg;
             }
             // Select output name
             else if (arg == "--output") {
-                output = argv[a + 1];
-                a += 1; //Skip the value
+                output = argv[++a];
             }
             else if (arg.ends_with(".root")) {
                 output = arg;
             }
             // Select config
             else if (arg == "--config-detector") {
-                configDetectorFlag = argv[a + 1];
-                a += 1; //Skip the value
+                configDetector = argv[++a];
             }
             else if (arg == "--config-generator") {
-                configGeneratorFlag = arg;
+                configGenerator = argv[++a];
             }
         }
     }
 
-    //Change directories
-    if (configDetectorFlag != "") {
-        detectorConfigFile = configDirectory / configDetectorFlag;
+    //Change I/O file
+    if (configDetector != "") {
+        detectorConfigFile = configDirectory / configDetector;
     }
-    if (configGeneratorFlag != "") {
-        generatorConfigFile = configDirectory / configGeneratorFlag;
+    if (configGenerator != "") {
+        generatorConfigFile = configDirectory / configGenerator;
     }
     if (output != "") {
         outputFile = outputDirectory / output;
     }
 
     // ---------------------------------------------------------
-    // Output setting
+    // Create output directories
     // ---------------------------------------------------------
-
-    bool created = std::filesystem::create_directories(outputDirectory);
     
-    if (created) {
+    if (std::filesystem::create_directories(outputDirectory)) {
         std::cout<<
             "Created " << outputDirectory.string() << " for output files."
         <<std::endl;
@@ -85,7 +86,11 @@ int main(int argc, char** argv)
         <<std::endl;
     }
 
-    std::filesystem::create_directories(tmpDirectory);
+    int j = 0;
+    while (!std::filesystem::create_directories(tmpDirectory)) {
+        ++j;
+        tmpDirectory = outputDirectory / ("tmp" + std::to_string(j));
+    }
 
     // ---------------------------------------------------------
     // Configuration setting
@@ -200,11 +205,8 @@ int main(int argc, char** argv)
             "Running '" <<macro<< "' macro."
         <<std::endl;
 
-        G4String command = "/control/execute ";
-        G4String macroFile = argv[1];
-
         uiManager->ApplyCommand(
-            command + macroFile
+            "/control/execute macros/" + macro
         );
     }
 
@@ -212,17 +214,41 @@ int main(int argc, char** argv)
     // Output files
     // ---------------------------------------------------------
 
-    std::cout<<
-        "Simulation ends successfully."
-    <<std::endl;
+    std::cout
+        <<"Simulation ends successfully."
+        <<std::endl;
 
-    MergeRootFiles();
+    const auto mergedOutputFile = MergeRootFiles();
 
-    std::cout<<
-        "Temporary files merged successfully."
-    <<std::endl;
+    std::cout
+        <<"Temporary files merged in "
+        <<mergedOutputFile.string()
+        <<" successfully."
+        <<std::endl;
 
     std::filesystem::remove_all(tmpDirectory);
+
+    std::cout
+        <<"Saving configuration parameters."
+        <<std::endl;
+
+    TFile file(
+        mergedOutputFile.string().c_str(),
+        "UPDATE"
+    );
+
+    if (file.IsZombie()) {
+        throw std::runtime_error(
+            "Cannot open final ROOT file: "
+            + mergedOutputFile.string()
+        );
+    }
+
+    WriteDetectorConfig(file);
+
+    WriteGeneratorConfig(file);
+
+    file.Close();
 
     // ---------------------------------------------------------
     // Cleanup
@@ -231,9 +257,9 @@ int main(int argc, char** argv)
     delete visManager;
     delete runManager;
 
-    std::cout<<
-        "Program is ended."
-    <<std::endl;
+    std::cout
+        <<"Program is ended."
+        <<std::endl;
 
     return 0;
 }

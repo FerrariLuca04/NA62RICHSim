@@ -6,7 +6,7 @@
 inline const std::filesystem::path outputDirectory =
     "output";
 
-inline const std::filesystem::path tmpDirectory =
+inline std::filesystem::path tmpDirectory =
     outputDirectory / "tmp";
 
 inline std::filesystem::path outputFile =
@@ -19,9 +19,9 @@ inline const std::filesystem::path configDirectory =
     "config";
 
 inline std::filesystem::path detectorConfigFile =
-    configDirectory / "default_detector.conf";
+    configDirectory / "detector" / "default.conf";
     
 inline std::filesystem::path generatorConfigFile =
-    configDirectory / "default_generator.conf";
+    configDirectory / "generator" / "default.conf";
 
 #endif

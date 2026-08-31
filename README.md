@@ -119,16 +119,18 @@ output/data_na62rich_sim.root
 A different output file name can be specified using the `--output` argument:
 
 ```bash
-./build/bin/na62_rich_sim --output name_file.root
+./build/bin/na62_rich_sim --output <output_name.root>
 ```
 
 Alternatively, a `.root` file name can be passed directly as a command-line argument:
 
 ```bash
-./build/bin/na62_rich_sim name_file.root
+./build/bin/na62_rich_sim <output_name.root>
 ```
 
-The file contains a `TTree` named `PhotonHits`, with one entry for each simulated event. Each entry stores the primary-particle properties and the optical-photon hits detected during the event.
+The output file contains a `TTree` named `PhotonHits`, with one entry for each simulated event. Each entry stores the primary-particle properties and the optical-photon hits detected during the event.
+
+The file also contains two additional `TTree`s that store the detector and primary-generator configuration parameters used during the simulation, named `DetectorConfig` and `PrimaryGeneratorConfig`. Each configuration tree contains a single entry, with branches named after the corresponding variables in the configuration files.
 
 For the complete output data structure, see [Output format](docs/output.md).
 
@@ -138,7 +140,7 @@ For the complete output data structure, see [Output format](docs/output.md).
 
 The default detector configuration is stored in:
 
-```text id="yrqpj2"
+```text
 config/detector_default.conf
 ```
 
@@ -149,18 +151,18 @@ You can modify this file and run the program again without recompiling it. This 
 To select a custom detector configuration file, use the `--config-detector` argument:
 
 ```bash
-./build/bin/na62_rich_sim --config-detector name_file.conf
+./build/bin/na62_rich_sim --config-detector <file_name.conf>
 ```
 
 ### Primary generator
 
 The default primary generator configuration is stored in:
 
-```text id="d5dlop"
+```text
 config/generator_default.conf
 ```
 
-This file defines the ranges used to randomly generate the primary particle properties, including:
+This file defines the ranges used to randomly generate the primary-particle properties, including:
 
 * the entrance point;
 * the virtual decay vertex, used to determine the particle direction;
@@ -171,12 +173,32 @@ As with the detector configuration, you can modify this file and run the program
 To select a custom generator configuration file, use the `--config-generator` argument:
 
 ```bash
-./build/bin/na62_rich_sim --config-generator name_file.conf
+./build/bin/na62_rich_sim --config-generator <file_name.conf>
 ```
 
 For the complete list of available configuration keywords, see [Configuration reference](docs/configuration.md).
 
 > [!WARNING] 
 >
-> Configuration files (`.conf`) must be located in the `config/` directory.
+> Configuration files (`.conf`) must be located in the `config/detector/` or `config/detector/` directory.
 
+## Tests
+
+Tests are managed with CTest.
+
+After building the project, all tests can be executed with:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Tests can also be selected by label:
+
+```bash
+ctest --test-dir build -L <label> --output-on-failure
+```
+
+The test suite currently includes checks for:
+
+* primary-particle generator (`prymary_generator`);
+* Cherenkov photon pruduction (`cherenkov`).

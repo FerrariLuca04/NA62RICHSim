@@ -7,6 +7,8 @@
 #include <vector>
 #include <limits>
 
+class TFile;
+
 struct EntranceParams {
     G4double rMin =
         std::numeric_limits<G4double>::quiet_NaN();
@@ -37,10 +39,12 @@ struct ParticleParams {
     std::string type;
 };
 
-void SetGeneratorParams(const std::string& filename);
-
 extern EntranceParams* entranceParams;
 extern DecayRegionParams* decayRegionParams;
 extern ParticleParams* particleParams;
+
+void SetGeneratorParams(const std::string& filename);
+
+void WriteGeneratorConfig(TFile& file);
 
 #endif

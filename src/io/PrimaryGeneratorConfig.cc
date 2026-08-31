@@ -2,6 +2,9 @@
 
 #include "na62rich/io/ParsersConfig.hh"
 
+#include "TFile.h"
+#include "TTree.h"
+
 #include "G4SystemOfUnits.hh"
 
 #include <algorithm>
@@ -124,4 +127,129 @@ void SetGeneratorParams(const std::string& filename)
             particleParams->type = value;
         }
     }
+}
+
+void WriteGeneratorConfig(TFile& file)
+{
+    file.cd();
+
+    TTree tree(
+        "PrimaryGeneratorConfig",
+        "Primary generator configuration"
+    );
+
+    // -----------------------------------------------------
+    // Entrance
+    // -----------------------------------------------------
+
+    double entranceRadiusMinMm =
+        entranceParams->rMin / mm;
+
+    double entranceRadiusMaxMm =
+        entranceParams->rMax / mm;
+
+    double entrancePhiMinDeg =
+        entranceParams->phiMin / deg;
+
+    double entrancePhiMaxDeg =
+        entranceParams->phiMax / deg;
+
+
+    // -----------------------------------------------------
+    // Decay region
+    // -----------------------------------------------------
+
+    double decayRegionStartM =
+        decayRegionParams->start / m;
+
+    double decayRegionLengthM =
+        decayRegionParams->length / m;
+
+    double decayRegionSigmaXmm =
+        decayRegionParams->sigmaX / mm;
+
+    double decayRegionSigmaYmm =
+        decayRegionParams->sigmaY / mm;
+
+
+    // -----------------------------------------------------
+    // Particle
+    // -----------------------------------------------------
+
+    double momentumMinGeV =
+        particleParams->pMin / GeV;
+
+    double momentumMaxGeV =
+        particleParams->pMax / GeV;
+
+    std::string particleType =
+        particleParams->type;
+
+
+    // -----------------------------------------------------
+    // Branches
+    // -----------------------------------------------------
+
+    tree.Branch(
+        "entrance_radius_min_mm",
+        &entranceRadiusMinMm
+    );
+
+    tree.Branch(
+        "entrance_radius_max_mm",
+        &entranceRadiusMaxMm
+    );
+
+    tree.Branch(
+        "entrance_phi_min_deg",
+        &entrancePhiMinDeg
+    );
+
+    tree.Branch(
+        "entrance_phi_max_deg",
+        &entrancePhiMaxDeg
+    );
+
+    tree.Branch(
+        "decay_region_start_m",
+        &decayRegionStartM
+    );
+
+    tree.Branch(
+        "decay_region_length_m",
+        &decayRegionLengthM
+    );
+
+    tree.Branch(
+        "decay_region_sigma_x_mm",
+        &decayRegionSigmaXmm
+    );
+
+    tree.Branch(
+        "decay_region_sigma_y_mm",
+        &decayRegionSigmaYmm
+    );
+
+    tree.Branch(
+        "particle_momentum_min_GeV",
+        &momentumMinGeV
+    );
+
+    tree.Branch(
+        "particle_momentum_max_GeV",
+        &momentumMaxGeV
+    );
+
+    tree.Branch(
+        "particle_type",
+        &particleType
+    );
+
+
+    // -----------------------------------------------------
+    // Single configuration entry
+    // -----------------------------------------------------
+
+    tree.Fill();
+    tree.Write();
 }
