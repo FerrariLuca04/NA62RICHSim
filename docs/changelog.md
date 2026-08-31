@@ -44,3 +44,10 @@ Modifiche sulla generazione delle particelle primarie con aggiunta del file `con
 - Randomizzazione del momento della particella primaria usando una distribuzione uniforme;
 - Scelta della particella tramire file.conf;
 - Nuovo file di configurazione per i parametri della particella primaria.
+
+## v.1.0.0 [01/09/26]:
+Simulazione comleta delle sue fuziionalita base, aggiunto:
+- due nuovi TTrees nel file di output per salvare i parametri di configurazione utilizzati per ottenere quei risultati.
+Aggiunti diversi test base:
+- due test per la generazione delle particelle primarie;
+- due test per verificare la produzione di luce Cherenkov.
