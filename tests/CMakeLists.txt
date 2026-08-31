@@ -96,6 +96,28 @@ add_test(
         ${PROJECT_SOURCE_DIR}/tests/scripts/run_test.cmake
 )
 
+add_test(
+    NAME cherenkov_energy
+
+    COMMAND
+        ${CMAKE_COMMAND}
+
+        -DPROJECT_ROOT=${PROJECT_SOURCE_DIR}
+        -DSIM_EXECUTABLE=$<TARGET_FILE:na62_rich_sim>
+        -DROOT_EXECUTABLE=${ROOT_EXECUTABLE}
+
+        -DMACRO=tests/distribution.mac
+        -DCONFIG=tests/generator_energy_cherenkov.conf
+
+        -DOUTPUT_NAME=test_energy_cherenkov.root
+        -DOUTPUT_FILE=${PROJECT_SOURCE_DIR}/output/test_energy_cherenkov.root
+
+        "-DROOT_TEST_CALL=${PROJECT_SOURCE_DIR}/tests/root/test_energy_cherenkov.C(\"output/test_energy_cherenkov.root\")"
+
+        -P
+        ${PROJECT_SOURCE_DIR}/tests/scripts/run_test.cmake
+)
+
 # ---------------------------------------------------------
 # Label
 # ---------------------------------------------------------
@@ -111,6 +133,7 @@ set_tests_properties(
 
 set_tests_properties(
     cherenkov_process
+    cherenkov_energy
     
     PROPERTIES
     LABELS "cherenkov"
@@ -125,6 +148,7 @@ set_tests_properties(
     primary_generator_pion
     primary_generator_distribution
     cherenkov_process
+    cherenkov_energy
     PROPERTIES
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
 )

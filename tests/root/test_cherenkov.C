@@ -580,7 +580,7 @@ int ValidateCherenkovProcess(
             );
         }
 
-        expectedRadiusGraph->SetLineWidth(1);
+        expectedRadiusGraph->SetLineWidth(1.5);
         expectedRadiusGraph->SetLineColor(kRed);
         expectedRadiusGraph->Draw("L SAME");
     }
@@ -680,7 +680,10 @@ void test_cherenkov(
 {
     const int result =
         ValidateCherenkovProcess(
-            filename
+            filename,
+
+            momentumBins,
+            radiusBins
         );
 
     gSystem->Exit(result);
