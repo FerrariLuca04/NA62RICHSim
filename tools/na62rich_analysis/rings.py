@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import least_squares
+import warnings
 
 
 def fit_circle(x, y, sigma_position=None) -> dict:
@@ -365,10 +366,14 @@ def reconstruct_ring(
     )
 
     if len(selected_x) < 3:
-        raise ValueError(
-            "At least three sensor hits on the same disk "
-            "are required to reconstruct a ring."
+        warnings.warn(
+            "Ring reconstruction skipped: fewer than three "
+            "sensor hits are available on the selected disk.",
+            RuntimeWarning,
+            stacklevel=2,
         )
+
+        return None
 
     ring = fit_circle(
         selected_x,
