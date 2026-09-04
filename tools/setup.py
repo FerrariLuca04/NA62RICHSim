@@ -2,11 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name="na62rich-analysis",
-    version="0.1.0",
+    version="0.1.1",
     description="Python analysis tools for NA62RICHSim output files",
 
-    packages=find_packages(where="tools"),
-    package_dir={"": "tools"},
+    packages=find_packages(),
 
     python_requires=">=3.10",
 
@@ -15,5 +14,6 @@ setup(
         "awkward",
         "numpy",
         "matplotlib",
+        "scipy",
     ],
 )
