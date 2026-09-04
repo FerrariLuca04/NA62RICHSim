@@ -286,3 +286,7 @@ python tools/examples/read_output.py
 ```
 
 The examples assume that the `na62rich_analysis` package has already been installed in the active Python environment.
+
+For a complete reference of the available Python functions, including parameters, return values, and possible exceptions, see [Python API refrence](docs/api.md).
+
+The API reference is generated automatically from the function docstrings and can be updated by running python `docs/generate_api.py`.

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
-from collections.abc import Sequence
 
 import awkward as ak
 import uproot
@@ -22,27 +22,50 @@ def load_events(
     """
     Load events from a NA62RICHSim ROOT output file.
 
-    Parameters
-    ----------
-    filename
+    The function opens the specified ROOT file, selects a TTree, and loads
+    the requested branches into an Awkward Array.
+
+    ### Parameters
+
+    `filename`
         Path to the ROOT file.
 
-    tree_name
-        Name of the TTree containing the simulated events.
+        The argument can be provided either as a string or as a path-like
+        object.
 
-    branches
-        Branches to load. If None, all branches are loaded.
+    `tree_name`
+        Name of the TTree to load.
 
-    entry_start
+        The default value is `"PhotonHits"`.
+
+    `branches`
+        Sequence containing the names of the branches to load.
+
+        If `None`, all available branches in the selected TTree are loaded.
+
+    `entry_start`
         Index of the first event to load.
 
-    entry_stop
+        If `None`, loading starts from the first entry.
+
+    `entry_stop`
         Index after the last event to load.
 
-    Returns
-    -------
-    awkward.Array
-        Events stored as an Awkward Array.
+        If `None`, entries are loaded up to the end of the TTree.
+
+    ### Returns
+
+    `awkward.Array`
+        Awkward Array containing the selected events and branches.
+
+    ### Raises
+
+    `FileNotFoundError`
+        If `filename` does not exist or is not a regular file.
+
+    `KeyError`
+        If `tree_name` is not present in the ROOT file or if one or more
+        requested branches are not present in the selected TTree.
     """
 
     path = Path(filename)
@@ -92,6 +115,33 @@ def get_branches(
 ) -> list[str]:
     """
     Return the names of the branches stored in a TTree.
+
+    ### Parameters
+
+    `filename`
+        Path to the ROOT file.
+
+        The argument can be provided either as a string or as a path-like
+        object.
+
+    `tree_name`
+        Name of the TTree whose branch names are returned.
+
+        The default value is `"PhotonHits"`.
+
+    ### Returns
+
+    `list[str]`
+        List containing the names of the branches stored in the selected
+        TTree.
+
+    ### Raises
+
+    `FileNotFoundError`
+        If `filename` does not exist or is not a regular file.
+
+    `KeyError`
+        If `tree_name` is not present in the ROOT file.
     """
 
     path = Path(filename)

@@ -1,7 +1,12 @@
+from collections.abc import Iterable
+from typing import Any
+
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 from matplotlib.collections import PatchCollection
-from matplotlib.patches import RegularPolygon
-from matplotlib.patches import Wedge
+from matplotlib.figure import Figure
+from matplotlib.patches import RegularPolygon, Wedge
+
 import numpy as np
 
 from .rings import (
@@ -11,19 +16,19 @@ from .rings import (
 
 
 def plot_sensor_heatmap(
-    events,
+    events: Iterable[Any],
     *,
-    x_field="sensor_pos_x_mm",
-    y_field="sensor_pos_y_mm",
-    disk="both",
-    hit_mode="photons",
-    pmt_params=None,
-    pmt_dim_field="pmt_radius_mm",
-    disk_pos_field="pmt_position_r_mm",
-    disk_radius_field="pmt_disk_radius_mm",
-    bins=100,
-    ax=None,
-):
+    x_field: str = "sensor_pos_x_mm",
+    y_field: str = "sensor_pos_y_mm",
+    disk: str = "both",
+    hit_mode: str = "photons",
+    pmt_params: Any | None = None,
+    pmt_dim_field: str = "pmt_radius_mm",
+    disk_pos_field: str = "pmt_position_r_mm",
+    disk_radius_field: str = "pmt_disk_radius_mm",
+    bins: int = 100,
+    ax: Axes | None = None,
+) -> tuple[Figure, Axes]:
     """
     Plot the sensor occupancy accumulated over all simulated events.
 
@@ -31,69 +36,72 @@ def plot_sensor_heatmap(
     PMT grid is reconstructed and each sensor is colored according to its
     occupancy. Otherwise, a standard two-dimensional histogram is used.
 
-    Parameters
-    ----------
-    events
-        Event collection returned by ``load_events``.
+    ### Parameters
 
-    x_field
+    `events`
+        Event collection returned by `load_events`.
+
+    `x_field`
         Name of the field containing the x positions of the hit sensors.
 
-    y_field
+    `y_field`
         Name of the field containing the y positions of the hit sensors.
 
-    disk
+    `disk`
         Sensor disk selection.
 
         Accepted values are:
 
-        - ``"both"``: use both PMT disks;
-        - ``"right"``: use only sensors with x > 0;
-        - ``"left"``: use only sensors with x < 0;
-        - ``"auto"``: for each event, use the disk containing the largest
+        - `"both"`: use both PMT disks;
+        - `"right"`: use only sensors with x > 0;
+        - `"left"`: use only sensors with x < 0;
+        - `"auto"`: for each event, use the disk containing the largest
           number of selected hits.
 
-    hit_mode
+    `hit_mode`
         Defines how multiple photons hitting the same sensor are treated.
 
         Accepted values are:
 
-        - ``"photons"``: repeated sensor positions are kept, so every
-          detected photon contributes one count;
-        - ``"sensors"``: each sensor contributes at most one count per event.
+        - `"photons"`: repeated sensor positions are kept, so every detected
+          photon contributes one count;
+        - `"sensors"`: each sensor contributes at most one count per event.
 
-    pmt_params
+    `pmt_params`
         Configuration table for detectors returned by
-        ``load_events(tree_name="DetectorConfig")``.
+        `load_events(tree_name="DetectorConfig")`.
 
-        If ``None``, a standard two-dimensional histogram is used.
+        If `None`, a standard two-dimensional histogram is used.
 
-    pmt_dim_field
+    `pmt_dim_field`
         Name of the field containing the PMT apothem.
 
-    disk_pos_field
+    `disk_pos_field`
         Name of the field containing the radial position of the PMT disks.
 
-    disk_radius_field
+    `disk_radius_field`
         Name of the field containing the radius of the PMT disks.
 
-    bins
+    `bins`
         Number of bins used by the fallback two-dimensional histogram.
-        This parameter is ignored when ``pmt_params`` is provided.
 
-    ax
-        Optional matplotlib axes.
+        This parameter is ignored when `pmt_params` is provided.
 
-    Returns
-    -------
-    tuple
-        ``(fig, ax)``
+    `ax`
+        Optional Matplotlib axes on which the plot is drawn.
 
-    Raises
-    ------
-    ValueError
-        If no sensor hits are available or if the detector configuration
-        is invalid.
+        If `None`, a new figure and axes are created.
+
+    ### Returns
+
+    `tuple`
+        Tuple `(fig, ax)` containing the Matplotlib figure and axes.
+
+    ### Raises
+
+    `ValueError`
+        If no sensor hits are available, if an unsupported disk or hit mode
+        is requested, or if the PMT detector configuration is invalid.
     """
 
     if ax is None:
@@ -154,7 +162,6 @@ def plot_sensor_heatmap(
         )
 
         # Associate every hit to the nearest sensor.
-        # Same procedure used in plot_event().
         for x_hit, y_hit in zip(all_x, all_y):
 
             distances = np.sqrt(
@@ -234,22 +241,22 @@ def plot_sensor_heatmap(
 
 
 def plot_event(
-    event,
+    event: Any,
     *,
-    sensor_x_field="sensor_pos_x_mm",
-    sensor_y_field="sensor_pos_y_mm",
-    true_x_field="hit_x_mm",
-    true_y_field="hit_y_mm",
-    disk="auto",
-    hit_mode="photons",
-    sigma_position=None,
-    pmt_params=None,
-    pmt_dim_field="pmt_radius_mm",
-    disk_pos_field="pmt_position_r_mm",
-    disk_radius_field="pmt_disk_radius_mm",
-    bins=30,
-    ax=None,
-):
+    sensor_x_field: str = "sensor_pos_x_mm",
+    sensor_y_field: str = "sensor_pos_y_mm",
+    true_x_field: str | None = "hit_x_mm",
+    true_y_field: str | None = "hit_y_mm",
+    disk: str = "auto",
+    hit_mode: str = "photons",
+    sigma_position: float | None = None,
+    pmt_params: Any | None = None,
+    pmt_dim_field: str = "pmt_radius_mm",
+    disk_pos_field: str = "pmt_position_r_mm",
+    disk_radius_field: str = "pmt_disk_radius_mm",
+    bins: int = 30,
+    ax: Axes | None = None,
+) -> tuple[Figure, Axes, dict[str, float | int | str]]:
     """
     Plot a single simulated event.
 
@@ -261,83 +268,95 @@ def plot_event(
     PMT grid is reconstructed and each sensor is colored according to its
     occupancy. Otherwise, a standard two-dimensional histogram is used.
 
-    Parameters
-    ----------
-    event
-        Single event record returned by ``load_events``.
+    ### Parameters
 
-    sensor_x_field
+    `event`
+        Single event record returned by `load_events`.
+
+    `sensor_x_field`
         Name of the field containing the x positions of the hit sensors.
 
-    sensor_y_field
+    `sensor_y_field`
         Name of the field containing the y positions of the hit sensors.
 
-    true_x_field
+    `true_x_field`
         Name of the field containing the true x positions of the detected
-        photons. Set to ``None`` to disable this overlay.
+        photons.
 
-    true_y_field
+        Set to `None` to disable this overlay.
+
+    `true_y_field`
         Name of the field containing the true y positions of the detected
-        photons. Set to ``None`` to disable this overlay.
+        photons.
 
-    disk
+        Set to `None` to disable this overlay.
+
+    `disk`
         Disk used for the ring reconstruction.
 
         Accepted values are:
 
-        - ``"right"``: use the PMT disk with x > 0;
-        - ``"left"``: use the PMT disk with x < 0;
-        - ``"auto"``: automatically select the disk containing the largest
+        - `"right"`: use the PMT disk with x > 0;
+        - `"left"`: use the PMT disk with x < 0;
+        - `"auto"`: automatically select the disk containing the largest
           number of observations used in the fit.
 
-    hit_mode
+    `hit_mode`
         Defines how multiple photons hitting the same sensor are treated.
 
         Accepted values are:
 
-        - ``"photons"``: repeated sensor positions are kept, so the sensor
+        - `"photons"`: repeated sensor positions are kept, so the sensor
           occupancy corresponds to the number of detected photons;
-        - ``"sensors"``: each sensor position is used only once.
+        - `"sensors"`: each sensor position is used only once.
 
-    sigma_position
+    `sigma_position`
         Position uncertainty associated with each sensor hit, expressed in
-        millimeters. The value is passed to ``reconstruct_ring``.
+        millimeters.
 
-        If ``None``, an unweighted fit is performed.
+        The value is passed to `reconstruct_ring`.
 
-    pmt_params
+        If `None`, an unweighted fit is performed.
+
+    `pmt_params`
         Configuration table for detectors returned by
-        ``load_events(tree_name="DetectorConfig")``.
+        `load_events(tree_name="DetectorConfig")`.
 
-        If ``None``, the sensor occupancy is displayed using ``hist2d``.
+        If `None`, the sensor occupancy is displayed using `hist2d`.
 
-    pmt_dim_field
+    `pmt_dim_field`
         Name of the field containing the PMT apothem.
 
-    disk_pos_field
+    `disk_pos_field`
         Name of the field containing the radial position of the PMT disks.
 
-    disk_radius_field
+    `disk_radius_field`
         Name of the field containing the radius of the PMT disks.
 
-    bins
+    `bins`
         Number of bins used by the fallback two-dimensional histogram.
-        This parameter is ignored when ``pmt_params`` is provided.
 
-    ax
-        Optional matplotlib axes.
+        This parameter is ignored when `pmt_params` is provided.
 
-    Returns
-    -------
-    tuple
-        ``(fig, ax, ring)`` where ``ring`` is the dictionary returned by
-        ``reconstruct_ring``.
+    `ax`
+        Optional Matplotlib axes on which the plot is drawn.
 
-    Raises
-    ------
-    ValueError
-        If the event does not contain enough valid sensor hits to reconstruct
-        a ring or if the PMT detector configuration is invalid.
+        If `None`, a new figure and axes are created.
+
+    ### Returns
+
+    `tuple`
+        Tuple `(fig, ax, ring)` containing:
+
+        - `fig`: Matplotlib figure;
+        - `ax`: Matplotlib axes;
+        - `ring`: dictionary containing the reconstructed ring parameters.
+
+    ### Raises
+
+    `ValueError`
+        If the ring cannot be reconstructed or if the PMT detector
+        configuration is invalid.
     """
 
     if ax is None:
@@ -357,6 +376,12 @@ def plot_event(
         hit_mode=hit_mode,
         sigma_position=sigma_position,
     )
+
+    if ring is None:
+        raise ValueError(
+            "The event does not contain enough sensor hits "
+            "to reconstruct and plot a ring."
+        )
 
     disk_used = ring["disk"]
 
@@ -398,7 +423,6 @@ def plot_event(
             dtype=float,
         )
 
-        # Associate every hit to the nearest sensor.
         for x_hit, y_hit in zip(sensor_x, sensor_y):
 
             distances = np.sqrt(
@@ -530,9 +554,9 @@ def plot_event(
         + ring["radius"] * np.sin(theta)
     )
 
-    # Radius uncertainty band.
     sigma_radius = ring["sigma_radius"]
 
+    # Radius uncertainty band.
     if (
         np.isfinite(sigma_radius)
         and sigma_radius > 0
@@ -579,7 +603,6 @@ def plot_event(
 
     ax.set_xlabel("x [mm]")
     ax.set_ylabel("y [mm]")
-
     ax.set_aspect("equal")
 
     ax.set_title(
@@ -594,34 +617,35 @@ def plot_event(
 
     return fig, ax, ring
 
+
 def _is_hexagon_inside_circle(
-    x,
-    y,
-    hex_radius,
-    circle_radius,
-):
+    x: float,
+    y: float,
+    hex_radius: float,
+    circle_radius: float,
+) -> bool:
     """
     Check whether a regular hexagon is fully contained inside a circle.
 
-    Parameters
-    ----------
-    x
+    ### Parameters
+
+    `x`
         x coordinate of the hexagon center.
 
-    y
+    `y`
         y coordinate of the hexagon center.
 
-    hex_radius
-        Distance from the hexagon center to one of its vertices.
+    `hex_radius`
+        Hexagon radius used by the detector containment test.
 
-    circle_radius
+    `circle_radius`
         Radius of the containing circle.
 
-    Returns
-    -------
-    bool
-        True if all six vertices of the hexagon are inside the circle,
-        False otherwise.
+    ### Returns
+
+    `bool`
+        `True` if all six tested vertices of the hexagon are inside the
+        circle, `False` otherwise.
     """
 
     for i in range(6):
@@ -647,48 +671,58 @@ def _is_hexagon_inside_circle(
 
     return True
 
+
 def _build_sensor_grid(
-    pmt_params,
+    pmt_params: Any,
     *,
-    pmt_dim_field="pmt_radius_mm",
-    disk_pos_field="pmt_position_r_mm",
-    disk_radius_field="pmt_disk_radius_mm",
-    disk="both",
-):
+    pmt_dim_field: str = "pmt_radius_mm",
+    disk_pos_field: str = "pmt_position_r_mm",
+    disk_radius_field: str = "pmt_disk_radius_mm",
+    disk: str = "both",
+) -> tuple[np.ndarray, float]:
     """
     Reconstruct the hexagonal PMT grid from the detector configuration.
 
-    Parameters
-    ----------
-    pmt_params
-        Configuration table for detectors returned by
-        ``load_events(tree_name="DetectorConfig")``.
+    ### Parameters
 
-    pmt_dim_field
+    `pmt_params`
+        Configuration table for detectors returned by
+        `load_events(tree_name="DetectorConfig")`.
+
+    `pmt_dim_field`
         Name of the field containing the PMT apothem.
 
-    disk_pos_field
+    `disk_pos_field`
         Name of the field containing the radial position of the PMT disks.
 
-    disk_radius_field
+    `disk_radius_field`
         Name of the field containing the radius of the PMT disks.
 
-    disk
+    `disk`
         Disk geometry to return.
 
         Accepted values are:
 
-        - ``"both"``: return both PMT disks;
-        - ``"right"``: return only the disk with x > 0;
-        - ``"left"``: return only the disk with x < 0;
-        - ``"auto"``: return both disks. The actual disk selection must
-          be performed separately for each event.
+        - `"both"`: return both PMT disks;
+        - `"right"`: return only the disk with x > 0;
+        - `"left"`: return only the disk with x < 0;
+        - `"auto"`: return both disks. The actual disk selection must be
+          performed separately for each event.
 
-    Returns
-    -------
-    tuple
-        ``(sensor_positions, circum_radius)`` where ``sensor_positions``
-        is an array with shape ``(N, 2)`` containing the PMT centers.
+    ### Returns
+
+    `tuple`
+        Tuple `(sensor_positions, circum_radius)` containing:
+
+        - `sensor_positions`: NumPy array with shape `(N, 2)` containing
+          the PMT center coordinates;
+        - `circum_radius`: circumradius of the hexagonal PMTs.
+
+    ### Raises
+
+    `ValueError`
+        If `disk` contains an unsupported value or if the detector
+        configuration is invalid.
     """
 
     if disk not in ("both", "right", "left", "auto"):
@@ -768,14 +802,16 @@ def _build_sensor_grid(
     sensor_positions = np.asarray(
         sensor_positions,
         dtype=float,
-    )
+    ).reshape(-1, 2)
 
     if disk == "right":
+
         sensor_positions = sensor_positions[
             sensor_positions[:, 0] > 0
         ]
 
     elif disk == "left":
+
         sensor_positions = sensor_positions[
             sensor_positions[:, 0] < 0
         ]
