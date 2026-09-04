@@ -146,6 +146,99 @@ def fit_circle(x, y, sigma_position=None) -> dict:
         "rms_residual": float(rms_residual),
     }
 
+
+def select_sensor_hits(
+    event,
+    *,
+    x_field="sensor_pos_x_mm",
+    y_field="sensor_pos_y_mm",
+    disk="both",
+    hit_mode="sensors",
+):
+    """
+    Extract sensor-hit coordinates from an event.
+
+    Parameters
+    ----------
+    event
+        Event record returned by load_events.
+
+    x_field
+        Name of the field containing the x positions of the hit sensors.
+
+    y_field
+        Name of the field containing the y positions of the hit sensors.
+
+    disk
+        Which disk to use:
+        - "both": use all sensor hits;
+        - "right": use only hits with x > 0;
+        - "left": use only hits with x < 0;
+        - "auto": choose the disk with more selected hits.
+
+    hit_mode
+        How repeated hits on the same sensor are treated:
+        - "photons": repeated sensor positions are kept;
+        - "sensors": each sensor position is used only once.
+
+    Returns
+    -------
+    tuple
+        (x, y, disk_used)
+    """
+
+    try:
+        x = np.asarray(event[x_field], dtype=float)
+        y = np.asarray(event[y_field], dtype=float)
+
+    except (KeyError, ValueError, IndexError):
+        raise KeyError(
+            f"Fields '{x_field}' and/or '{y_field}' not found in the event."
+        ) from None
+
+    if hit_mode not in ("photons", "sensors"):
+        raise ValueError(
+            "hit_mode must be 'photons' or 'sensors'."
+        )
+
+    if disk not in ("both", "right", "left", "auto"):
+        raise ValueError(
+            "disk must be 'both', 'right', 'left', or 'auto'."
+        )
+
+    valid = np.isfinite(x) & np.isfinite(y)
+
+    x = x[valid]
+    y = y[valid]
+
+    if hit_mode == "sensors":
+        x, y = _unique_sensors(x, y)
+
+    if disk == "both":
+        return x, y, "both"
+
+    right_mask = x > 0
+    left_mask = x < 0
+
+    right_x = x[right_mask]
+    right_y = y[right_mask]
+
+    left_x = x[left_mask]
+    left_y = y[left_mask]
+
+    if disk == "right":
+        return right_x, right_y, "right"
+
+    if disk == "left":
+        return left_x, left_y, "left"
+
+    # disk == "auto"
+    if len(right_x) >= len(left_x):
+        return right_x, right_y, "right"
+
+    return left_x, left_y, "left"
+
+
 def _unique_sensors(x, y):
     """
     Remove duplicated sensor positions.
@@ -169,103 +262,26 @@ def reconstruct_ring(
     x_field="sensor_pos_x_mm",
     y_field="sensor_pos_y_mm",
     disk="auto",
-    hit_mode="photons",
+    hit_mode="sensors",
     sigma_position=None,
 ):
     """
     Reconstruct a Cherenkov ring from the sensor hits of an event.
-
-    Parameters
-    ----------
-    event
-        Event record returned by load_events.
-
-    x_field
-        Name of the field containing the x positions of the hit sensors.
-
-    y_field
-        Name of the field containing the y positions of the hit sensors.
-
-    disk
-        Disk used for the reconstruction:
-        - "right": use sensors with x > 0;
-        - "left": use sensors with x < 0;
-        - "auto": use the disk containing the largest number of selected hits.
-
-    hit_mode
-        Defines how multiple photons hitting the same sensor are treated:
-        - "photons": repeated sensor positions are kept, so sensors are
-          weighted by the number of detected photons;
-        - "sensors": each hit sensor is used only once.
-
-    sigma_position
-        Position uncertainty of each sensor hit.
-        If None, an unweighted fit is performed.
-
-    Returns
-    -------
-    dict
-        Dictionary containing the reconstructed circle parameters.
     """
 
-    try:
-        x = np.asarray(event[x_field], dtype=float)
-        y = np.asarray(event[y_field], dtype=float)
-
-    except (KeyError, ValueError, IndexError):
-        raise KeyError(
-            f"Fields '{x_field}' and/or '{y_field}' "
-            "not found in the event."
-        ) from None
-
-    if hit_mode not in ("photons", "sensors"):
+    if disk == "both":
         raise ValueError(
-            "hit_mode must be 'photons' or 'sensors'."
+            "reconstruct_ring does not support disk='both'. "
+            "Use 'left', 'right', or 'auto'."
         )
 
-    if disk not in ("auto", "right", "left"):
-        raise ValueError(
-            "disk must be 'auto', 'right', or 'left'."
-        )
-
-    # Separate hits belonging to the two PMT disks.
-    right_mask = x > 0
-    left_mask = x < 0
-
-    right_x = x[right_mask]
-    right_y = y[right_mask]
-
-    left_x = x[left_mask]
-    left_y = y[left_mask]
-
-    # If requested, remove repeated hits on the same sensor.
-    if hit_mode == "sensors":
-        right_x, right_y = _unique_sensors(
-            right_x,
-            right_y,
-        )
-
-        left_x, left_y = _unique_sensors(
-            left_x,
-            left_y,
-        )
-
-    # Select the disk.
-    if disk == "right":
-        selected_x = right_x
-        selected_y = right_y
-
-    elif disk == "left":
-        selected_x = left_x
-        selected_y = left_y
-
-    else:
-        if len(right_x) >= len(left_x):
-            selected_x = right_x
-            selected_y = right_y
-        else:
-            selected_x = left_x
-            selected_y = left_y
+    selected_x, selected_y, disk_used = select_sensor_hits(
+        event,
+        x_field=x_field,
+        y_field=y_field,
+        disk=disk,
+        hit_mode=hit_mode,
+    )
 
     if len(selected_x) < 3:
         raise ValueError(
@@ -273,8 +289,12 @@ def reconstruct_ring(
             "are required to reconstruct a ring."
         )
 
-    return fit_circle(
+    ring = fit_circle(
         selected_x,
         selected_y,
-        sigma_position
+        sigma_position=sigma_position,
     )
+
+    ring["disk"] = disk_used
+
+    return ring
