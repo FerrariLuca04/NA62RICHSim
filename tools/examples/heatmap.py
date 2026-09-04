@@ -9,11 +9,20 @@ events = rich.load_events(
     ],
 )
 
+detector = rich.load_events(
+    "output/data_na62rich_sim.root",
+    tree_name="DetectorConfig",
+    branches=[
+        "pmt_radius_mm",
+        "pmt_position_r_mm",
+        "pmt_disk_radius_mm",
+    ],
+)
+
 fig, ax = rich.plot_sensor_heatmap(
     events,
-    disk="both",
-    hit_mode="sensors",
-    bins=100,
+    pmt_params=detector,
+    disk="left",
 )
 
 plt.show()

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="na62rich-analysis",
-    version="0.1.2",
+    version="0.1.3",
     description="Python analysis tools for NA62RICHSim output files",
 
     packages=find_packages(),

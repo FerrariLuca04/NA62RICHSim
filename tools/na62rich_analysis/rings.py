@@ -9,13 +9,13 @@ def fit_circle(x, y, sigma_position=None) -> dict:
     Parameters
     ----------
     x
-        x coordinates of the sensor hits.
+        x coordinates of the hits.
 
     y
-        y coordinates of the sensor hits.
+        y coordinates of the hits.
 
     sigma_position
-        Position uncertainty of each sensor hit.
+        Position uncertainty of each hit.
         If None, an unweighted fit is performed.
 
     Returns
@@ -146,6 +146,22 @@ def fit_circle(x, y, sigma_position=None) -> dict:
         "rms_residual": float(rms_residual),
     }
 
+def _unique_sensors(x, y):
+    """
+    Remove duplicated sensor positions.
+    """
+
+    points = np.column_stack((x, y))
+
+    unique_points = np.unique(
+        points,
+        axis=0,
+    )
+
+    return (
+        unique_points[:, 0],
+        unique_points[:, 1],
+    )
 
 def select_sensor_hits(
     event,
@@ -153,7 +169,7 @@ def select_sensor_hits(
     x_field="sensor_pos_x_mm",
     y_field="sensor_pos_y_mm",
     disk="both",
-    hit_mode="sensors",
+    hit_mode="photons",
 ):
     """
     Extract sensor-hit coordinates from an event.
@@ -238,36 +254,101 @@ def select_sensor_hits(
 
     return left_x, left_y, "left"
 
-
-def _unique_sensors(x, y):
-    """
-    Remove duplicated sensor positions.
-    """
-
-    points = np.column_stack((x, y))
-
-    unique_points = np.unique(
-        points,
-        axis=0,
-    )
-
-    return (
-        unique_points[:, 0],
-        unique_points[:, 1],
-    )
-
 def reconstruct_ring(
     event,
     *,
     x_field="sensor_pos_x_mm",
     y_field="sensor_pos_y_mm",
     disk="auto",
-    hit_mode="sensors",
+    hit_mode="photons",
     sigma_position=None,
 ):
     """
-    Reconstruct a Cherenkov ring from the sensor hits of an event.
+    Reconstruct a Cherenkov ring from the sensor hits of a simulated event.
+
+    The function extracts the positions of the hit sensors from the event,
+    optionally removes repeated sensor positions, selects one of the two
+    sensor disks, and performs a circular fit using ``fit_circle``.
+
+    Parameters
+    ----------
+    event
+        Event record returned by ``load_events``.
+
+    x_field
+        Name of the field containing the x coordinates of the hit sensors,
+        expressed in millimeters.
+
+    y_field
+        Name of the field containing the y coordinates of the hit sensors,
+        expressed in millimeters.
+
+    disk
+        Sensor disk used for the reconstruction.
+
+        Accepted values are:
+
+        - ``"right"``: use only sensors with x > 0;
+        - ``"left"``: use only sensors with x < 0;
+        - ``"auto"``: automatically select the disk containing the largest
+          number of observations used in the fit.
+
+    hit_mode
+        Defines how multiple photons hitting the same sensor are treated.
+
+        Accepted values are:
+
+        - ``"photons"``: repeated sensor positions are kept. A sensor hit by
+          multiple photons therefore contributes multiple times to the fit;
+        - ``"sensors"``: each sensor position is used only once, independently
+          of the number of photons detected by that sensor.
+
+    sigma_position
+        Position uncertainty associated with each sensor hit, expressed in
+        millimeters.
+
+        If provided, the value is passed to ``fit_circle`` and is used to
+        weight the geometrical residuals and estimate the uncertainties on
+        the reconstructed circle parameters.
+
+        If ``None``, an unweighted fit is performed.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the reconstructed ring parameters.
+
+        The returned dictionary contains:
+
+        - ``center_x``: reconstructed x coordinate of the ring center;
+        - ``center_y``: reconstructed y coordinate of the ring center;
+        - ``radius``: reconstructed ring radius;
+        - ``sigma_center_x``: uncertainty on the x coordinate of the center;
+        - ``sigma_center_y``: uncertainty on the y coordinate of the center;
+        - ``sigma_radius``: uncertainty on the reconstructed radius;
+        - ``n_hits``: number of observations used in the fit;
+        - ``rms_residual``: RMS of the radial residuals;
+        - ``disk``: disk actually used for the reconstruction.
+
+    Raises
+    ------
+    KeyError
+        If ``x_field`` or ``y_field`` is not present in the event.
+
+    ValueError
+        If ``disk`` or ``hit_mode`` contains an unsupported value, or if
+        fewer than three valid sensor hits are available on the selected disk.
+
+    Notes
+    -----
+    When ``hit_mode="photons"``, multiple photons detected by the same sensor
+    effectively increase the statistical weight of that sensor position.
+
+    When ``hit_mode="sensors"``, each sensor contributes only once to the fit,
+    so the reconstruction depends only on the spatial distribution of the
+    hit sensors.
     """
+
 
     if disk == "both":
         raise ValueError(
