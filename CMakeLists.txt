@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
     NA62RICHSim
-    VERSION 1.0.0
+    VERSION 1.1.0
     DESCRIPTION "Educational Geant4 simulation of the NA62 RICH detector"
     LANGUAGES CXX
 )

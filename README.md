@@ -1,5 +1,7 @@
 # NA62RICHSim
 
+![Descrizione immagine](example.png)
+
 Monte Carlo simulation of the NA62 RICH detector based on Geant4.
 
 The project aims to reproduce the main components and response of the NA62 Ring Imaging Cherenkov detector and to study its particle identification performance.
@@ -202,3 +204,89 @@ The test suite currently includes checks for:
 
 * primary-particle generator (`prymary_generator`);
 * Cherenkov photon pruduction (`cherenkov`).
+
+## Python analysis tools
+
+NA62RICHSim includes a small Python package for reading and analyzing the ROOT files produced by the simulation.
+
+The package is located in:
+
+```text
+tools/na62rich_analysis/
+```
+
+### Installation
+
+The Python tools require Python 3 and the dependencies listed in `tools/setup.py`.
+
+It is recommended to install the package inside a virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install ./tools
+```
+
+On systems where a virtual environment or another isolated Python environment is already available, only the last command is required:
+
+```bash
+pip install ./tools
+```
+
+For development, the package can be installed in editable mode:
+
+```bash
+pip install -e ./tools
+```
+
+In this mode, changes made to the source files inside `tools/na62rich_analysis/` are immediately available without reinstalling the package.
+
+### Usage
+
+After installation, the package can be imported as:
+
+```python
+import na62rich_analysis as rich
+```
+
+For example, a simulation output file can be opened with:
+
+```python
+import na62rich_analysis as rich
+
+events = rich.load_events(
+    "output/data_na62rich_sim.root"
+)
+
+print(events)
+```
+
+The available branches can be inspected with:
+
+```python
+branches = rich.get_branches(
+    "output/data_na62rich_sim.root"
+)
+
+print(branches)
+```
+
+### Examples
+
+Example scripts using the analysis package are provided in:
+
+```text
+tools/examples/
+```
+
+For example:
+
+```bash
+python tools/examples/read_output.py
+```
+
+The examples assume that the `na62rich_analysis` package has already been installed in the active Python environment.
+
+For a complete reference of the available Python functions, including parameters, return values, and possible exceptions, see [Python API refrence](docs/api.md).
+
+The API reference is generated automatically from the function docstrings and can be updated by running python `docs/generate_api.py`.

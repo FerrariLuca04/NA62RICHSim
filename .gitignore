@@ -10,6 +10,14 @@ cmake-build-*/
 *.dylib
 *.exe
 
+# Python
+.venv/
+*.egg-info/
+build/
+dist/
+__pycache__/
+*.pyc
+
 # Output e log
 output/
 *.log
