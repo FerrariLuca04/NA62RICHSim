@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import na62rich_analysis as rich
 
 events = rich.load_events(
-    "output/data_na62rich_sim.root",
+    "tools/examples/example.root",
     branches=[
         "sensor_pos_x_mm",
         "sensor_pos_y_mm",
@@ -22,7 +22,7 @@ detector = rich.load_events(
 fig, ax = rich.plot_sensor_heatmap(
     events,
     pmt_params=detector,
-    disk="left",
+    disk="both",
 )
 
 plt.show()

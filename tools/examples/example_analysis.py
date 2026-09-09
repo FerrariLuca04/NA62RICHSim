@@ -1,10 +1,35 @@
 import na62rich_analysis as rich
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 SIMULATION_NAME = "tools/examples/example.root"
+
+OUTPUT_DIR = Path("plots")
+OUTPUT_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+
+# ---------------------------------------------------------
+# Plot configuration
+# ---------------------------------------------------------
+
+CM_TO_INCH = 1.0 / 2.54
+
+
+plt.rcParams.update({
+    "font.size": 10,
+    "axes.labelsize": 8,
+    "axes.titlesize": 10,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "legend.fontsize": 8,
+})
 
 
 # ---------------------------------------------------------
@@ -76,7 +101,6 @@ for event in events:
     )
 
 
-# Convert to NumPy arrays
 fitted_radius = np.asarray(
     fitted_radius
 )
@@ -91,19 +115,21 @@ primary_momentum = np.asarray(
 
 
 # ---------------------------------------------------------
-# Plot
+# Reconstructed radius vs momentum
 # ---------------------------------------------------------
 
-
-### Total plot ###
-
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(
+    figsize=(6 * CM_TO_INCH, 6 * CM_TO_INCH),
+    constrained_layout=True,
+)
 
 ax.errorbar(
     primary_momentum,
     fitted_radius,
     yerr=fitted_radius_error,
     fmt=".",
+    markersize=3,
+    linewidth=0.8,
 )
 
 ax.set_xlabel(
@@ -111,19 +137,28 @@ ax.set_xlabel(
 )
 
 ax.set_ylabel(
-    "Reconstructed ring radius [mm]"
+    "Ring radius [mm]"
 )
 
 ax.set_title(
-    "Reconstructed Cherenkov ring radius"
+    "Reconstructed Cherenkov ring"
 )
 
+fig.savefig(
+    "plots/ring_radius_vs_momentum.pdf",
+    bbox_inches="tight",
+)
 
-### radius distributions in selected momentum ranges ###
+plt.close(fig)
+
+
+# ---------------------------------------------------------
+# Radius distributions in selected momentum ranges
+# ---------------------------------------------------------
 
 momentum_ranges = [
-    (20.0, 25.0),   # [GeV/c]
-    (40.0, 45.0),   # [GeV/c]
+    (20.0, 25.0),
+    (40.0, 45.0),
 ]
 
 for p_min, p_max in momentum_ranges:
@@ -137,7 +172,10 @@ for p_min, p_max in momentum_ranges:
         momentum_mask
     ]
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(
+        figsize=(6 * CM_TO_INCH, 6 * CM_TO_INCH),
+        constrained_layout=True,
+    )
 
     ax.hist(
         selected_radii,
@@ -145,7 +183,7 @@ for p_min, p_max in momentum_ranges:
     )
 
     ax.set_xlabel(
-        "Reconstructed ring radius [mm]"
+        "Ring radius [mm]"
     )
 
     ax.set_ylabel(
@@ -153,21 +191,62 @@ for p_min, p_max in momentum_ranges:
     )
 
     ax.set_title(
-        f"Ring radius distribution\n"
-        f"{p_min:.1f} ≤ p < {p_max:.1f} GeV/c"
+        f"{p_min:.0f} ≤ p < {p_max:.0f} GeV/c"
     )
 
+    fig.savefig(
+        f"plots/ring_radius_{p_min:.0f}_{p_max:.0f}_GeV.pdf",
+        bbox_inches="tight",
+    )
 
-### casual event plot ###
+    plt.close(fig)
 
-u = np.random.uniform()
 
-i_event = int(u * len(events))
+# ---------------------------------------------------------
+# Random event
+# ---------------------------------------------------------
+
+i_event = np.random.randint(
+    len(events)
+)
+
+fig, ax = plt.subplots(
+    figsize= (8 * CM_TO_INCH, 8 * CM_TO_INCH),
+    constrained_layout=True,
+)
 
 rich.plot_event(
     events[i_event],
-    sigma_position = sigma,
-    pmt_params = detector,
+    sigma_position=sigma,
+    pmt_params=detector,
+    ax=ax,
 )
 
-plt.show()
+fig.savefig(
+    "plots/example_event.pdf",
+    bbox_inches="tight",
+)
+
+plt.close(fig)
+
+# ---------------------------------------------------------
+# Heatmap
+# ---------------------------------------------------------
+
+fig, ax = plt.subplots(
+    figsize= (16 * CM_TO_INCH, 8 * CM_TO_INCH),
+    constrained_layout=True,
+)
+
+rich.plot_sensor_heatmap(
+    events,
+    pmt_params=detector,
+    ax=ax,
+)
+
+fig.savefig(
+    "plots/example_heatmap.pdf",
+    bbox_inches="tight",
+)
+
+plt.close(fig)
