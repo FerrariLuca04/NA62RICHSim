@@ -7,6 +7,7 @@
 #include <TSystem.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
+#include <TLegend.h>
 
 #include <algorithm>
 #include <cmath>
@@ -451,7 +452,7 @@ int ValidateCherenkovProcess(
     double deltaSum = 0.0;
     double deltaSquaredSum = 0.0;
 
-    std::set<double> particleMassesGeV;
+    std::set<int> particlePdgCodes;
 
     Long64_t validEvents = 0;
 
@@ -477,8 +478,8 @@ int ValidateCherenkovProcess(
         // Predict ring radius
         // -------------------------------------------------
 
+        particlePdgCodes.insert(pdgCode);
         const double massGeV = GetParticleMassGeV(pdgCode);
-        particleMassesGeV.insert(massGeV);
 
         const double radiusPredictMm =
             ExpectedCherenkovRadius(
@@ -541,16 +542,53 @@ int ValidateCherenkovProcess(
         900,
         700
     );
+    gStyle->SetOptStat(0);
 
     histogram->Draw("COLZ");
+
+    auto* legend = new TLegend(
+        0.60, 0.70,
+        0.88, 0.88
+    );
+
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+
+    legend->AddEntry(
+        histogram,
+        "Geant4 simulation",
+        "f"
+    );
 
     // -----------------------------------------------------
     // Draw expected graph
     // -----------------------------------------------------
 
-    int theoryPoints = momentumBins * 10;
+    const std::vector<int> colors = {
+        kRed,
+        kBlue,
+        kGreen + 2,
+        kMagenta,
+        kOrange + 7,
+        kCyan + 2
+    };
 
-    for (const double m : particleMassesGeV) {
+    const std::vector<int> lineStyles = {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+    };
+
+    int theoryPoints = momentumBins * 10;
+    std::size_t particleIndex = 0;
+
+    for (const int pdg : particlePdgCodes) {
+
+        const double m = GetParticleMassGeV(pdg);
+
         auto* expectedRadiusGraph =
             new TGraph(theoryPoints);
 
@@ -580,10 +618,34 @@ int ValidateCherenkovProcess(
             );
         }
 
-        expectedRadiusGraph->SetLineWidth(1.5);
-        expectedRadiusGraph->SetLineColor(kRed);
+        expectedRadiusGraph->SetLineWidth(2);
+
+        expectedRadiusGraph->SetLineColor(
+            colors[particleIndex % colors.size()]
+        );
+
+        expectedRadiusGraph->SetLineStyle(
+            lineStyles[particleIndex % lineStyles.size()]
+        );
+
         expectedRadiusGraph->Draw("L SAME");
+
+        const auto* particle =
+            TDatabasePDG::Instance()->GetParticle(pdg);
+
+        legend->AddEntry(
+            expectedRadiusGraph,
+            Form(
+                "%s",
+                particle ? particle->GetName() : "particle"
+            ),
+            "l"
+        );
+
+        ++particleIndex;
     }
+
+    legend->Draw();
 
     canvas->Modified();
     canvas->Update();

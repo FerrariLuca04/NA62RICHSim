@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import na62rich_analysis as rich
 
 events = rich.load_events(
-    "output/data_na62rich_sim.root",
+    "tools/examples/example.root",
     branches=[
         "sensor_pos_x_mm",
         "sensor_pos_y_mm",
@@ -12,7 +12,7 @@ events = rich.load_events(
 )
 
 detector = rich.load_events(
-    "output/data_na62rich_sim.root",
+    "tools/examples/example.root",
     tree_name="DetectorConfig",
     branches=[
         "pmt_radius_mm",

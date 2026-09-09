@@ -1,6 +1,6 @@
 import na62rich_analysis as rich
 
-filename = "output/data_na62rich_sim.root"
+filename = "tools/examples/example.root"
 
 print(rich.get_branches(filename))
 

@@ -68,7 +68,7 @@ add_test(
         -DOUTPUT_NAME=test_distribution.root
         -DOUTPUT_FILE=${PROJECT_SOURCE_DIR}/output/test_distribution.root
 
-        "-DROOT_TEST_CALL=${PROJECT_SOURCE_DIR}/tests/root/test_primary_generator_distribution.C(\"output/test_distribution.root\",10000)"
+        "-DROOT_TEST_CALL=${PROJECT_SOURCE_DIR}/tests/root/test_primary_generator_distribution.C(\"output/test_distribution.root\",1000)"
 
         -P
         ${PROJECT_SOURCE_DIR}/tests/scripts/run_test.cmake

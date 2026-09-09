@@ -5,6 +5,7 @@
 #include <TH1D.h>
 #include <TGraph.h>
 #include <TSystem.h>
+#include <TLegend.h>
 
 
 #include <algorithm>
@@ -372,6 +373,8 @@ int ValidateCherenkovEnergy(
         700
     );
 
+    gStyle->SetOptStat(0);
+
     histogram->Draw("COLZ");
 
     // -----------------------------------------------------
@@ -410,6 +413,28 @@ int ValidateCherenkovEnergy(
     predictedSpectrum.SetLineWidth(2);
     predictedSpectrum.SetLineColor(kRed);
     predictedSpectrum.Draw("L SAME");
+
+    auto* legend = new TLegend(
+        0.60, 0.75,
+        0.88, 0.88
+    );
+
+    legend->AddEntry(
+        histogram,
+        "Geant4 simulation",
+        "l"
+    );
+
+    legend->AddEntry(
+        &predictedSpectrum,
+        "Expected spectrum",
+        "l"
+    );
+
+    legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
+
+    legend->Draw();
 
     canvas->Modified();
     canvas->Update();

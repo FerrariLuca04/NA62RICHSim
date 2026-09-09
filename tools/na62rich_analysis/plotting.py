@@ -205,6 +205,8 @@ def plot_sensor_heatmap(
         fig.colorbar(
             collection,
             ax=ax,
+            fraction=0.0175,
+            pad=0.04,
             label="Sensor counts",
         )
 
@@ -225,6 +227,8 @@ def plot_sensor_heatmap(
         fig.colorbar(
             heatmap[3],
             ax=ax,
+            fraction=0.046,
+            pad=0.04,
             label="Sensor counts",
         )
 
@@ -233,8 +237,7 @@ def plot_sensor_heatmap(
     ax.set_aspect("equal")
 
     ax.set_title(
-        "PMT occupancy\n"
-        f"disk={disk}, hit_mode={hit_mode}"
+        "PMT occupancy"
     )
 
     return fig, ax
@@ -245,8 +248,6 @@ def plot_event(
     *,
     sensor_x_field: str = "sensor_pos_x_mm",
     sensor_y_field: str = "sensor_pos_y_mm",
-    true_x_field: str | None = "hit_x_mm",
-    true_y_field: str | None = "hit_y_mm",
     disk: str = "auto",
     hit_mode: str = "photons",
     sigma_position: float | None = None,
@@ -260,9 +261,8 @@ def plot_event(
     """
     Plot a single simulated event.
 
-    The plot contains the sensor occupancy, the true positions of the
-    detected photons, the reconstructed Cherenkov ring, the fitted center,
-    and the uncertainty on the reconstructed radius.
+    The plot contains the sensor occupancy, the reconstructed Cherenkov ring, 
+    the fitted center, and the uncertainty on the reconstructed radius.
 
     If the PMT detector configuration is provided, the physical hexagonal
     PMT grid is reconstructed and each sensor is colored according to its
@@ -278,18 +278,6 @@ def plot_event(
 
     `sensor_y_field`
         Name of the field containing the y positions of the hit sensors.
-
-    `true_x_field`
-        Name of the field containing the true x positions of the detected
-        photons.
-
-        Set to `None` to disable this overlay.
-
-    `true_y_field`
-        Name of the field containing the true y positions of the detected
-        photons.
-
-        Set to `None` to disable this overlay.
 
     `disk`
         Disk used for the ring reconstruction.
@@ -466,6 +454,8 @@ def plot_event(
         fig.colorbar(
             collection,
             ax=ax,
+            fraction=0.046,
+            pad=0.04,
             label="Sensor counts",
         )
 
@@ -484,56 +474,7 @@ def plot_event(
             ax=ax,
             label="Sensor counts",
         )
-
-    # ---------------------------------------------------------
-    # True photon positions
-    # ---------------------------------------------------------
-
-    if true_x_field is not None and true_y_field is not None:
-
-        try:
-            true_x = np.asarray(
-                event[true_x_field],
-                dtype=float,
-            )
-
-            true_y = np.asarray(
-                event[true_y_field],
-                dtype=float,
-            )
-
-            valid = (
-                np.isfinite(true_x)
-                & np.isfinite(true_y)
-            )
-
-            true_x = true_x[valid]
-            true_y = true_y[valid]
-
-            if disk_used == "right":
-
-                mask = true_x > 0
-
-                true_x = true_x[mask]
-                true_y = true_y[mask]
-
-            elif disk_used == "left":
-
-                mask = true_x < 0
-
-                true_x = true_x[mask]
-                true_y = true_y[mask]
-
-            ax.scatter(
-                true_x,
-                true_y,
-                marker=".",
-                label="True photon positions",
-            )
-
-        except (KeyError, ValueError, IndexError):
-            pass
-
+        
     # ---------------------------------------------------------
     # Fitted ring
     # ---------------------------------------------------------
@@ -571,8 +512,8 @@ def plot_event(
             theta1=0.0,
             theta2=360.0,
             width=2.0 * sigma_radius,
+            color="orange",
             alpha=0.2,
-            label="1σ radius band",
         )
 
         ax.add_patch(
@@ -593,7 +534,7 @@ def plot_event(
         ring["center_y"],
         xerr=ring["sigma_center_x"],
         yerr=ring["sigma_center_y"],
-        fmt="o",
+        fmt=".",
         label="Fitted center",
     )
 
@@ -606,11 +547,11 @@ def plot_event(
     ax.set_aspect("equal")
 
     ax.set_title(
-        "Event display\n"
-        f"disk={disk_used}, "
-        f"R={ring['radius']:.2f} ± "
-        f"{ring['sigma_radius']:.2f} mm, "
-        f"N={ring['n_hits']}"
+        "Event display"
+        "\n"
+        rf"$R={ring['radius']:.2f} \pm {ring['sigma_radius']:.2f}\,\mathrm{{mm}}$"
+        "\n"
+        rf"$C=({ring["center_x"]:.1f} \pm {ring["sigma_center_x"]:.1f},\,{ring["center_y"]:.1f} \pm {ring["sigma_center_y"]:.1f})\,\mathrm{{mm}}$"
     )
 
     ax.legend()
