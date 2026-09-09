@@ -10,7 +10,7 @@ events = rich.load_events(
 )
 
 detector = rich.load_events(
-    "output/data_na62rich_sim.root",
+    "tools/examples/example.root",
     tree_name="DetectorConfig",
     branches=[
         "pmt_radius_mm",

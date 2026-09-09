@@ -1,7 +1,7 @@
 import na62rich_analysis as rich
 
 events = rich.load_events(
-    "output/data_na62rich_sim.root",
+    "tools/examples/example.root",
     entry_stop=5,
 )
 
